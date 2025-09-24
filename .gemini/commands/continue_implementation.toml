@@ -1,0 +1,19 @@
+description = "Continues development of the bootstrap_checklist.md" 
+ 
+prompt = """
+ Your task is to implement the next stage of the Tubular programming language, using the
+  project's markdown files as your guide.
+
+   1. Identify the Goal: Your primary goal is to complete the first unfinished phase listed in
+      bootstrap_checklist.md.
+
+   2. Follow the Plan: Use the checklist items within that single phase as your step-by-step
+      implementation plan. Do not move to the next phase until all items in the current one are
+      complete.
+
+   3. Ensure Correctness: For each operator or feature you implement, you must ensure it
+      strictly adheres to the behavior described in tubular_spec.md.
+
+   4. Update Progress: As you complete each step, you must edit bootstrap_checklist.md to mark
+      the item as complete by changing [ ] to [x].
+"""
