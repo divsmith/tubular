@@ -8,18 +8,18 @@ This document outlines the necessary phases and steps to develop the Tubular pro
 
 **Goal:** Create a working Tubular interpreter in an existing host language (e.g., Python, Rust, TypeScript). This allows for testing the language design and running the first simple programs.
 
-- [x] **Choose a Host Language:** Python
+- [ ] **Choose a Host Language:** Python
 - [ ] **Implement Core Simulation:**
-    - [x] Create the 2D `Grid` data structure.
-    - [x] Implement the `Droplet` data structure (value, direction).
-    - [x] Build the main execution loop that processes droplets each "tick".
+    - [ ] Create the 2D `Grid` data structure.
+    - [ ] Implement the `Droplet` data structure (value, direction).
+    - [ ] Build the main execution loop that processes droplets each "tick".
 - [ ] **Implement Language Features:**
-    - [x] Implement all pipe operators as defined in `tubular_spec.md v1.1`.
-    - [x] Implement the global Data Stack.
-    - [x] Implement the global Call Stack.
-    - [x] Implement "The Reservoir" as a 2D random-access memory grid.
-- [x] **Build the CLI:**
-    - [x] Create a command-line interface that can load and run a `.tub` file.
+    - [ ] Implement all pipe operators as defined in `tubular_spec.md v1.1`.
+    - [ ] Implement the global Data Stack.
+    - [ ] Implement the global Call Stack.
+    - [ ] Implement "The Reservoir" as a 2D random-access memory grid.
+- [ ] **Build the CLI:**
+    - [ ] Create a command-line interface that can load and run a `.tub` file.
 - [ ] **Create a Test Suite:**
     - [ ] Write a comprehensive set of small `.tub` programs that test every single operator and feature to verify correctness.
 
