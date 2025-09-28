@@ -16,4 +16,14 @@ prompt = """
 
    4. Update Progress: As you complete each step, you must edit bootstrap_checklist.md to mark
       the item as complete by changing [ ] to [x].
+
+
+Additional requirements:
+    * Protect against infinite loops when testing and debugging. Set reasonable upper limits for execution time,
+    and when exceeded assume that an infinite loop has been encountered and stop the test manually before debugging. 
+    * Clean up any log output or temporary files once finished with them.
+    * DO NOT GET CAUGHT IN INFINITE LOOPS.
+    * All tests must pass successfully.
+    * You may never disable, remove, skip, or rewrite a test as a no-op to make it pass successfully.
+    * Do not skip any steps, including sub-steps.
 """
