@@ -1,5 +1,5 @@
 description = "Continues development of the bootstrap_checklist.md" 
- 
+
 prompt = """
  Your task is to implement the next stage of the Tubular programming language, using the
   project's markdown files as your guide.
@@ -17,10 +17,21 @@ prompt = """
    4. Update Progress: As you complete each step, you must edit bootstrap_checklist.md to mark
       the item as complete by changing [ ] to [x].
 
+   5. Verify Implementation: Before moving to the next checklist item, verify that your
+      implementation works correctly by running appropriate tests or examples that confirm
+      the behavior matches the specification.
+
+   6. Clean Up: Remove and clean up any temporary files, logs, or other artifacts created
+      during the implementation process to maintain a clean project environment.
+
 
 Additional requirements:
+    * Follow the project directory structure guidelines as documented in QWEN.md
+    * EXTREME CARE must be taken to avoid getting stuck in infinite loops, especially during testing
     * Protect against infinite loops when testing and debugging. Set reasonable upper limits for execution time,
     and when exceeded assume that an infinite loop has been encountered and stop the test manually before debugging. 
+    * When testing, ALWAYS implement safeguards and timeouts to prevent infinite execution
+    * If execution exceeds time limits, assume an infinite loop and stop manually - NEVER ignore potential infinite loops
     * Clean up any log output or temporary files once finished with them.
     * DO NOT GET CAUGHT IN INFINITE LOOPS.
     * All tests must pass successfully.
