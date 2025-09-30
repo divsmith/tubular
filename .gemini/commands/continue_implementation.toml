@@ -32,9 +32,15 @@ Additional requirements:
     and when exceeded assume that an infinite loop has been encountered and stop the test manually before debugging. 
     * When testing, ALWAYS implement safeguards and timeouts to prevent infinite execution
     * If execution exceeds time limits, assume an infinite loop and stop manually - NEVER ignore potential infinite loops
-    * Clean up any log output or temporary files once finished with them.
     * DO NOT GET CAUGHT IN INFINITE LOOPS.
-    * All tests must pass successfully.
+    * Regression Testing Requirements:
+        - At the beginning of each phase, run all existing tests
+        - All tests that are passing at the start of the phase are considered the regression set
+        - Under NO CIRCUMSTANCES may you disable, remove, skip, or otherwise neuter any test in the regression set to make it pass
+        - As you implement a phase, new tests may be written and removed as appropriate to cover the current logic being implemented
+        - At the end of a phase, all tests in the regression set AND any new tests added to the test suite should be passing successfully
     * You may never disable, remove, skip, or rewrite a test as a no-op to make it pass successfully.
     * Do not skip any steps, including sub-steps.
+    * If tests are failing, identify the root cause and fix it properly rather than attempting to work around it.
+    * When tests fail, create a targeted fix that addresses the underlying issue in the implementation.
 """
