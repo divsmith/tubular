@@ -45,15 +45,15 @@ This document outlines the necessary phases and steps to develop the Tubular pro
 
 **Goal:** Rewrite the compiler from Phase 2, but this time in the Tubular language itself. This is the most significant and challenging step.
 
-- [ ] **Design Data Structures in Tubular:**
-    - [ ] Plan how to represent strings, arrays, and lookup tables using The Reservoir. This is a critical design task.
-- [ ] **Write the Compiler in Tubular:**
-    - [ ] Create `compiler.tub`, the source code for the new compiler.
-    - [ ] **Lexer/Parser:** Write Tubular code that reads a `.tub` file (via the `?` operator) from standard input and builds a representation of it in The Reservoir.
-    - [ ] **Code Generator:** Write Tubular code that traverses your in-memory representation and prints the target language (WASM/C) to standard output (via the `!` operator).
-- [ ] **Compile the Self-Hosting Compiler:**
-    - [ ] Use the compiler from Phase 2 (`tubularc-v1`) to compile `compiler.tub`.
-    - [ ] The result is your first self-hosted compiler executable, `tubularc-v2`.
+- [x] **Design Data Structures in Tubular:**
+    - [x] Plan how to represent strings, arrays, and lookup tables using The Reservoir. This is a critical design task.
+- [x] **Write the Compiler in Tubular:**
+    - [x] Create `compiler.tub`, the source code for the new compiler.
+    - [x] **Lexer/Parser:** Write Tubular code that reads a `.tub` file (via the `?` operator) from standard input and builds a representation of it in The Reservoir.
+    - [x] **Code Generator:** Write Tubular code that traverses your in-memory representation and prints the target language (WASM/C) to standard output (via the `!` operator).
+- [x] **Compile the Self-Hosting Compiler:**
+    - [x] Use the compiler from Phase 2 (`tubularc-v1`) to compile `compiler.tub`.
+    - [x] The result is your first self-hosted compiler executable, `tubularc-v2`.
 
 ---
 
