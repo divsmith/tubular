@@ -239,7 +239,7 @@ class TubularInterpreter:
             while True:
                 next_char = self.grid.get_cell(read_x, y)
                 # Stop reading if we encounter a pipe character or whitespace
-                if next_char in " @|^-\\/#+" or next_char.isspace():
+                if next_char in " @|^-\\/#+"\ or next_char.isspace():
 
                     break
                 # Add the ASCII value of the character as a new droplet with ASCII output flag

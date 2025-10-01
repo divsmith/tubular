@@ -29,15 +29,15 @@ This document outlines the necessary phases and steps to develop the Tubular pro
 
 **Goal:** Write a compiler in the host language that translates Tubular source code into a lower-level language like C or WebAssembly (WASM).
 
-- [ ] **Choose a Compilation Target:** Decide on the output language (WASM is a good, portable choice).
-- [ ] **Design Compiler Architecture:**
-    - [ ] **Lexer:** A simple component that reads the `.tub` grid and validates characters.
-    - [ ] **Code Generator:** The main component that analyzes the pipe layout and emits equivalent target code (e.g., WASM text format). A direct-to-target approach is likely simpler than a multi-stage IR approach for the first compiler.
-- [ ] **Implement the Compiler:**
-    - [ ] Write the compiler (`tubularc-v1`) in your chosen host language.
-- [ ] **Verify Compiler Correctness:**
-    - [ ] Compile the test suite from Phase 1 using `tubularc-v1`.
-    - [ ] Run the compiled executables and ensure their output is identical to the interpreter's output from Phase 1.
+- [x] **Choose a Compilation Target:** Decide on the output language (WASM is a good, portable choice).
+- [x] **Design Compiler Architecture:**
+    - [x] **Lexer:** A simple component that reads the `.tub` grid and validates characters.
+    - [x] **Code Generator:** The main component that analyzes the pipe layout and emits equivalent target code (e.g., WASM text format). A direct-to-target approach is likely simpler than a multi-stage IR approach for the first compiler.
+- [x] **Implement the Compiler:**
+    - [x] Write the compiler (`tubularc-v1`) in your chosen host language.
+- [x] **Verify Compiler Correctness:**
+    - [x] Compile the test suite from Phase 1 using `tubularc-v1`.
+    - [x] Run the compiled executables and ensure their output is identical to the interpreter's output from Phase 1.
 
 ---
 

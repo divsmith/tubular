@@ -21,8 +21,25 @@ prompt = """
       implementation works correctly by running appropriate tests or examples that confirm
       the behavior matches the specification.
 
-   6. Clean Up: Remove and clean up any temporary files, logs, or other artifacts created
-      during the implementation process to maintain a clean project environment.
+   6. Clean Up: Remove and clean up any temporary files, logs, debug files, or other artifacts created
+      during the implementation process to maintain a clean project environment. This includes
+      any files created for testing, debugging, or verification that are not part of the 
+      final implementation (such as debug_*.py, test_*.py, temp_*.py, or temporary_*.py files).
+      This cleanup should be performed automatically and consistently without being reminded.
+      
+      CRITICAL: Failure to complete this cleanup successfully and as expected will force the user 
+      to use another coding agent to complete this task. This cleanup is vitally important and
+      cannot be overemphasized. This is a non-negotiable requirement for continuing work.
+      
+      TEMPORARY DIRECTORY REQUIREMENT: ANY temporary, debug, or backup file should be created in a 
+      /app/temp directory. Under NO CIRCUMSTANCES should any temporary, backup, or debug file be created 
+      ANYWHERE other than inside the /app/temp directory. After completing a body of work, the entire 
+      contents of the /app/temp directory should be emptied. Nothing should be left. All temporary files 
+      should be deleted from the /app/temp directory after use. DO NOT create ANY debug files ANYWHERE 
+      other than the /app/temp directory.
+      
+      CRITICAL CONSEQUENCE: Failure to comply with the /app/temp directory requirement will force 
+      the user to use another coding agent like Claude or GPT. This is a non-negotiable requirement.
 
 
 Additional requirements:

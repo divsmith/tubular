@@ -21,16 +21,18 @@ class Droplet:
     Each droplet has a value and a direction of travel.
     """
     
-    def __init__(self, value: int = 0, direction: Direction = Direction.DOWN):
+    def __init__(self, value: int = 0, direction: Direction = Direction.DOWN, is_ascii_output: bool = False):
         """
         Initialize a droplet.
         
         Args:
             value: Initial value of the droplet (default 0)
             direction: Initial direction of travel (default DOWN)
+            is_ascii_output: Whether this droplet should be output as ASCII (default False)
         """
         self.value = value
         self.direction = direction
+        self.is_ascii_output = is_ascii_output
     
     def move(self) -> Tuple[int, int]:
         """

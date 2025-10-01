@@ -11,12 +11,17 @@
 - Verify each implementation before moving to the next step
 - Run all tests to ensure nothing is broken
 - Clean up temporary files after implementation
+- All temporary files must be created in and cleaned up from the /app/temp directory
 
 ## Temporary Files
-- Whenever creating a temporary utility file, test for debugging purposes, or any other file that needs to be removed later, add its name to TEMP.md
-- Before finishing your current implementation step, delete all the files listed in TEMP.md
-- All tests should still pass, and the build should still succeed after removing all the files listed in TEMP.md
-- Finally, clear out the contents all of TEMP.md
+- Under NO CIRCUMSTANCES should any temporary, debug, or backup file be created ANYWHERE other than inside the /app/temp directory
+- ANY temporary, debug, or backup file should be created in the /app/temp directory
+- Before creating any temporary file, first ensure the /app/temp directory exists: `mkdir -p /app/temp`
+- After completing a body of work, the entire contents of the /app/temp directory should be emptied
+- Nothing should be left in /app/temp after use - all temporary files should be deleted from the /app/temp directory after use
+- DO NOT create ANY debug files ANYWHERE other than the /app/temp directory
+- If no TEMP.md file exists, you should create it and follow this process
+- Examples of files to put in /app/temp: debug_*.py, test_*.py, *_backup.py, *_fixed.py, temporary utility scripts, etc.
 
 ## Code Quality
 - Write clean, well-documented code
@@ -40,8 +45,11 @@
 - At the end of a phase, all tests in the regression set AND any new tests added to the test suite should be passing successfully
 
 ## Workspace Cleanup Requirements
-- Clean up all temporary files immediately after they are no longer needed
-- Remove backup files, temporary code files, debug scripts, and any other temporary artifacts
-- Maintain a clean workspace with only permanent project files
-- Examples of temporary files to clean up: `*.py` files created for testing/debugging, `*_backup.py`, `*_fixed.py`, `*.log`, and other temporary artifacts
-- Before completing any phase, run a cleanup to remove temporary files that are no longer needed
+- All temporary, debug, and backup files must be created in the /app/temp directory
+- Clean up ALL contents of the /app/temp directory immediately after temporary files are no longer needed
+- Remove backup files, temporary code files, debug scripts, and any other temporary artifacts from the /app/temp directory
+- Maintain a clean workspace with only permanent project files outside of /app/temp
+- After completing any phase or task, ensure the /app/temp directory is completely emptied
+- Examples of files that should be in /app/temp: `debug_*.py`, `test_*.py`, `*_backup.py`, `*_fixed.py`, `*.log`, and other temporary artifacts
+- NEVER leave any temporary files in /app/temp directory after they are no longer needed
+- If the /app/temp directory doesn't exist, create it before placing any temporary files: `mkdir -p /app/temp`
