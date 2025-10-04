@@ -68,7 +68,7 @@ class Grid:
             if y >= height:
                 break
             row = list(line) + [' '] * (width - len(line))
-            grid._grid.append(row)
+            grid._grid[y] = row
 
         return grid
 
@@ -111,16 +111,29 @@ class Grid:
 
     def is_empty(self) -> bool:
         """
-        Check if the grid is empty.
+        Check if the grid is empty (dimensionally).
 
         Returns:
-            True if the grid has no content, False otherwise
+            True if the grid has no dimensions, False otherwise
         """
         return self.width == 0 or self.height == 0
 
+    def _is_all_spaces(self) -> bool:
+        """
+        Check if the grid contains only spaces.
+
+        Returns:
+            True if all cells are spaces, False otherwise
+        """
+        for row in self._grid:
+            for cell in row:
+                if cell != ' ':
+                    return False
+        return True
+
     def __str__(self) -> str:
         """Return string representation of the grid."""
-        if not self._grid:
+        if not self._grid or self._is_all_spaces():
             return "Empty grid"
 
         lines = []

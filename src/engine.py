@@ -54,10 +54,16 @@ class Engine:
 
         For each active droplet:
         - Calculate the new position based on its direction
-        - If the target cell is empty (' '), move the droplet there
-        - If the target cell is non-empty or out of bounds, destroy the droplet
+        - Handle pipe characters according to their behavior:
+          * '|' (Vertical Pipe): allows vertical movement (UP/DOWN)
+          * '-' (Horizontal Pipe): allows horizontal movement (LEFT/RIGHT)
+          * '^' (Go Up Pipe): forces direction to UP
+          * '#' (Wall): destroys droplet
+        - If movement not allowed or out of bounds, destroy the droplet
+        - After calculating all positions, check for collisions
         """
         droplets_to_remove: List[Droplet] = []
+        new_positions: List[tuple] = []  # Track (droplet, new_x, new_y) for collision detection
 
         for droplet in self.droplets:
             # Calculate new position
@@ -73,19 +79,63 @@ class Engine:
             elif droplet.direction == Direction.RIGHT:
                 new_x += 1
 
-            # Check if new position is valid and empty
-            if (0 <= new_x < self.grid.width and
-                0 <= new_y < self.grid.height and
-                self.grid.get(new_x, new_y) == ' '):
+            # Check if new position is valid
+            if not (0 <= new_x < self.grid.width and 0 <= new_y < self.grid.height):
+                # Out of bounds - destroy droplet
+                droplets_to_remove.append(droplet)
+                continue
 
-                # Move droplet to new position
+            target_cell = self.grid.get(new_x, new_y)
+
+            # Handle pipe characters
+            if target_cell == '|':
+                # Vertical pipe - only allow vertical movement
+                if droplet.direction in [Direction.UP, Direction.DOWN]:
+                    droplet.x = new_x
+                    droplet.y = new_y
+                    new_positions.append((droplet, new_x, new_y))
+                else:
+                    # Wrong direction for vertical pipe - destroy droplet
+                    droplets_to_remove.append(droplet)
+            elif target_cell == '-':
+                # Horizontal pipe - only allow horizontal movement
+                if droplet.direction in [Direction.LEFT, Direction.RIGHT]:
+                    droplet.x = new_x
+                    droplet.y = new_y
+                    new_positions.append((droplet, new_x, new_y))
+                else:
+                    # Wrong direction for horizontal pipe - destroy droplet
+                    droplets_to_remove.append(droplet)
+            elif target_cell == '^':
+                # Go up pipe - force direction to UP and move
+                droplet.direction = Direction.UP
                 droplet.x = new_x
                 droplet.y = new_y
+                new_positions.append((droplet, new_x, new_y))
+            elif target_cell == '#':
+                # Wall - destroy droplet
+                droplets_to_remove.append(droplet)
+            elif target_cell == ' ':
+                # Empty space - move droplet
+                droplet.x = new_x
+                droplet.y = new_y
+                new_positions.append((droplet, new_x, new_y))
             else:
-                # Mark droplet for removal (collision or out of bounds)
+                # Any other non-empty cell - destroy droplet
                 droplets_to_remove.append(droplet)
 
-        # Remove destroyed droplets
+        # Check for collisions after calculating all positions
+        position_count = {}
+        for droplet, x, y in new_positions:
+            pos_key = (x, y)
+            position_count[pos_key] = position_count.get(pos_key, 0) + 1
+
+        # Mark droplets for removal if they collide (2+ droplets in same position)
+        for droplet, x, y in new_positions:
+            if position_count[(x, y)] > 1:
+                droplets_to_remove.append(droplet)
+
+        # Remove all destroyed droplets
         for droplet in droplets_to_remove:
             self.remove_droplet(droplet)
 
