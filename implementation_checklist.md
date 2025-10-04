@@ -89,7 +89,7 @@ This document outlines a minimal, incremental, and testable plan for implementin
 
 ---
 
-### [ ] Step 6: Unary Operators
+### [x] Step 6: Unary Operators
 
 **Goal:** Implement the first value-modifying operators.
 

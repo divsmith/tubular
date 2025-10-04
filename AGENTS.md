@@ -20,6 +20,12 @@ Custom testing frameworks are no longer allowed in this project. All new and exi
 - All test files must be located in the test/ directory.
 - Regression tests must be run after every change. A task is not complete until regression tests pass successfully.
 
+## Automated Verification Process
+
+All changes and updates in business logic should have a new or updated test to exercise it.
+
+All resources, such as test .tub programs used for validation within tests should be located within the tests/resources directory.
+
 ## Workspace Cleanup Requirements
 
 **All coding agents must clean up temporary and debug files created during their work.**
