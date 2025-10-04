@@ -72,6 +72,44 @@ class Grid:
 
         return grid
 
+    @classmethod
+    def from_string(cls, grid_string: str) -> 'Grid':
+        """
+        Create a grid from a string representation.
+
+        Args:
+            grid_string: String containing the grid data with rows separated by newlines
+
+        Returns:
+            A new Grid instance populated with the string data
+
+        Raises:
+            ValueError: If the string format is invalid
+        """
+        if not grid_string:
+            raise ValueError("Grid string is empty")
+
+        # Split the string into lines, preserving whitespace
+        lines = grid_string.strip().split('\n')
+
+        if not lines:
+            raise ValueError("Grid string contains no data")
+
+        # Find the maximum width
+        height = len(lines)
+        width = max(len(line) for line in lines) if lines else 0
+
+        # Create grid instance
+        grid = cls(width, height)
+
+        # Fill the grid - only set non-space characters like create_grid_from_string does
+        for y, line in enumerate(lines):
+            for x, char in enumerate(line):
+                if char != ' ':
+                    grid._grid[y][x] = char
+
+        return grid
+
     def get(self, x: int, y: int) -> str:
         """
         Get the character at the specified coordinates.
