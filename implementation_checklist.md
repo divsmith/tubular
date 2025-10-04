@@ -75,7 +75,7 @@ This document outlines a minimal, incremental, and testable plan for implementin
 
 ---
 
-- [ ] ### Step 4: Program Start & Basic Output
+- [x] ### Step 4: Program Start & Basic Output
 
 **Goal:** Implement the program entry point and a way to see numeric output.
 

@@ -16,17 +16,26 @@ this file will be developed to include:
 - Reservoir (memory) management
 - Subroutine support
 
-Current Status: Step 1 - Core Data Structures Complete
-Next: Step 2 - Execution Engine Implementation
+Current Status: Step 4 - Program Start & Basic Output Complete
+Next: Step 5 - Unary Operators Implementation
 """
 
 import sys
 import argparse
 
 # Import core data structures for Step 1
-from .grid import Grid
-from .droplet import Droplet
-from .direction import Direction
+try:
+    # Try relative imports (when run as module)
+    from .grid import Grid
+    from .droplet import Droplet
+    from .direction import Direction
+    from .engine import Engine
+except ImportError:
+    # Fall back to absolute imports (when run as script)
+    from grid import Grid
+    from droplet import Droplet
+    from direction import Direction
+    from engine import Engine
 
 
 def main():
@@ -43,16 +52,40 @@ def main():
         print()
         print("Usage: python compiler.py <file.tub>")
         print()
-        print("Step 1 Complete: Core data structures (Grid, Droplet, Direction) implemented.")
-        print("The actual execution engine will be developed in subsequent steps.")
+        print("Step 4 Complete: Program Start (@) and Numeric Output (n) implemented.")
+        print("The execution engine is now functional with basic program execution.")
         print()
         print("See implementation_checklist.md for the development plan.")
         return 0
 
-    print(f"Loading grid from: {args.file}")
-    print("Core data structures ready - execution engine not yet implemented.")
-    print("See Step 2 in implementation_checklist.md")
-    return 0
+    try:
+        # Load the grid from file
+        grid = Grid.from_file(args.file)
+        print(f"Loaded grid from: {args.file}")
+
+        # Create engine and run the program
+        engine = Engine(grid)
+        print("Executing program...")
+
+        # Run the execution loop until no droplets remain
+        tick_count = 0
+        while not engine.is_empty():
+            engine.tick()
+            tick_count += 1
+            # Prevent infinite loops (safety measure)
+            if tick_count > 10000:
+                print("Execution terminated: maximum tick limit reached")
+                break
+
+        print("Program execution completed.")
+        return 0
+
+    except FileNotFoundError:
+        print(f"Error: File '{args.file}' not found.")
+        return 1
+    except Exception as e:
+        print(f"Error executing program: {e}")
+        return 1
 
 
 if __name__ == "__main__":

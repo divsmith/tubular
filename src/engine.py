@@ -6,9 +6,14 @@ Manages the execution of droplets on a grid during program execution.
 """
 
 from typing import List
-from .grid import Grid
-from .droplet import Droplet
-from .direction import Direction
+try:
+    from .grid import Grid
+    from .droplet import Droplet
+    from .direction import Direction
+except ImportError:
+    from grid import Grid
+    from droplet import Droplet
+    from direction import Direction
 
 
 class Engine:
@@ -28,6 +33,7 @@ class Engine:
         """
         self.grid = grid
         self.droplets: List[Droplet] = []
+        self._initialize_program()
 
     def add_droplet(self, droplet: Droplet) -> None:
         """
@@ -47,6 +53,20 @@ class Engine:
         """
         if droplet in self.droplets:
             self.droplets.remove(droplet)
+
+    def _initialize_program(self) -> None:
+        """
+        Initialize the program by scanning for '@' (Program Start) character.
+
+        Creates an initial trigger droplet (value 0, direction Down) at the '@' position.
+        """
+        for y in range(self.grid.height):
+            for x in range(self.grid.width):
+                if self.grid.get(x, y) == '@':
+                    # Create initial droplet with value 0, direction DOWN
+                    initial_droplet = Droplet(0, x, y, Direction.DOWN)
+                    self.add_droplet(initial_droplet)
+                    return  # Only one '@' should exist, so we can return after finding it
 
     def tick(self) -> None:
         """
@@ -114,6 +134,10 @@ class Engine:
                 new_positions.append((droplet, new_x, new_y))
             elif target_cell == '#':
                 # Wall - destroy droplet
+                droplets_to_remove.append(droplet)
+            elif target_cell == 'n':
+                # Numeric output - print droplet value and destroy droplet
+                print(droplet.value)
                 droplets_to_remove.append(droplet)
             elif target_cell == ' ':
                 # Empty space - move droplet

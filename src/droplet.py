@@ -6,7 +6,10 @@ Represents a droplet that moves through the grid during program execution.
 """
 
 from typing import Tuple
-from .direction import Direction
+try:
+    from .direction import Direction
+except ImportError:
+    from direction import Direction
 
 
 class Droplet:
