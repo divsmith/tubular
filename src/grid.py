@@ -28,6 +28,10 @@ class Grid:
         self.height = height
         self._grid: List[List[str]] = []
 
+        # Initialize grid with empty spaces
+        for y in range(height):
+            self._grid.append([' '] * width)
+
     @classmethod
     def from_file(cls, filepath: str) -> 'Grid':
         """

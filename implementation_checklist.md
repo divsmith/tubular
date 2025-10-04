@@ -3,29 +3,29 @@
 This document outlines a minimal, incremental, and testable plan for implementing the Tubular programming language as per the v1.1 specification.
 
 ---
-- [ ] ### Step 0: Project Setup and Infrastructure
+- [x] ### Step 0: Project Setup and Infrastructure
 
 **Goal:** Establish the foundational project structure and development environment for the Tubular language implementation.
 
 **Tasks:**
-- [ ] 1.  Create the basic directory structure (`src/`, `tests/`, `docs/`, `examples/`)
-- [ ] 2.  Set up the build system as a Makefile with three required commands: compile, test, and clean
-- [ ] 3.  Initialize version control repository (git init) and create initial .gitignore
-- [ ] 4.  Create basic project documentation structure (README.md, API docs folder)
+- [x] 1.  Create the basic directory structure (`src/`, `tests/`, `docs/`, `examples/`)
+- [x] 2.  Set up the build system as a Makefile with three required commands: compile, test, and clean
+- [x] 3.  Initialize version control repository (git init) and create initial .gitignore
+- [x] 4.  Create basic project documentation structure (README.md, API docs folder)
 
 **Verification:**
-- [ ] *   Verify all directories are created and have appropriate initial files
-- [ ] *   Confirm Makefile is functional with all three required commands:
+- [x] *   Verify all directories are created and have appropriate initial files
+- [x] *   Confirm Makefile is functional with all three required commands:
     - `make compile` should build the project executable
     - `make test` should run the test suite
     - `make clean` should remove all build artifacts and temporary files
-- [ ] *   Ensure version control is properly initialized with initial commit
-- [ ] *   Check that project documentation structure is in place and accessible
+- [x] *   Ensure version control is properly initialized with initial commit
+- [x] *   Check that project documentation structure is in place and accessible
 
 ---
 
 
-- [ ] ### Step 1: Core Data Structures
+- [x] ### Step 1: Core Data Structures
 
 **Goal:** Establish the fundamental data structures for the program grid and data droplets.
 
@@ -40,7 +40,7 @@ This document outlines a minimal, incremental, and testable plan for implementin
 
 ---
 
-- [ ] ### Step 2: The Execution Engine
+- [x] ### Step 2: The Execution Engine
 
 **Goal:** Create the main execution loop that processes ticks and moves droplets.
 

@@ -29,20 +29,19 @@ test: tests/
 	@echo "Running test suite..."
 	@if [ -d tests ]; then \
 		if [ -n "$$(find tests -name '*.py' -type f)" ]; then \
-			echo "Found test files, running with python -m unittest"; \
-			python -m unittest discover tests -v; \
+			echo "Found test files, running with pytest"; \
+			echo "Running pytest tests..."; \
+			python -m pytest tests/ -v --tb=short; \
+			echo "Running custom test_engine.py..."; \
+			python tests/test_engine.py; \
 		else \
 			echo "No test files found in tests/ directory"; \
 			echo "Creating placeholder test file..."; \
-			echo 'import unittest' > tests/test_placeholder.py; \
+			echo 'import pytest' > tests/test_placeholder.py; \
 			echo '' >> tests/test_placeholder.py; \
-			echo 'class TestTubular(unittest.TestCase):' >> tests/test_placeholder.py; \
-			echo '    def test_placeholder(self):' >> tests/test_placeholder.py; \
-			echo '        self.assertTrue(True)' >> tests/test_placeholder.py; \
-			echo '' >> tests/test_placeholder.py; \
-			echo 'if __name__ == "__main__":' >> tests/test_placeholder.py; \
-			echo '    unittest.main()' >> tests/test_placeholder.py; \
-			python -m unittest tests.test_placeholder -v; \
+			echo 'def test_placeholder():' >> tests/test_placeholder.py; \
+			echo '    assert True' >> tests/test_placeholder.py; \
+			python -m pytest tests/test_placeholder.py -v; \
 		fi \
 	else \
 		echo "Error: tests/ directory not found"; \
