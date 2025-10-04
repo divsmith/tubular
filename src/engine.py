@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 """
 Execution Engine for Tubular programming language.
@@ -151,6 +152,42 @@ class Engine:
                 droplet.x = new_x
                 droplet.y = new_y
                 new_positions.append((droplet, new_x, new_y))
+            elif target_cell == '/':
+                # Forward-slash corner
+                if droplet.value == 0:
+                    if droplet.direction == Direction.DOWN:
+                        droplet.direction = Direction.LEFT
+                    elif droplet.direction == Direction.UP:
+                        droplet.direction = Direction.RIGHT
+                    elif droplet.direction == Direction.RIGHT:
+                        droplet.direction = Direction.DOWN
+                    elif droplet.direction == Direction.LEFT:
+                        droplet.direction = Direction.UP
+                else:
+                    if droplet.direction == Direction.DOWN:
+                        droplet.direction = Direction.RIGHT
+                    elif droplet.direction == Direction.UP:
+                        droplet.direction = Direction.LEFT
+                    elif droplet.direction == Direction.RIGHT:
+                        droplet.direction = Direction.UP
+                    elif droplet.direction == Direction.LEFT:
+                        droplet.direction = Direction.DOWN
+                droplet.x = new_x
+                droplet.y = new_y
+                new_positions.append((droplet, new_x, new_y))
+            elif target_cell == '\\':
+                # Back-slash corner
+                if droplet.direction == Direction.DOWN:
+                    droplet.direction = Direction.RIGHT
+                elif droplet.direction == Direction.UP:
+                    droplet.direction = Direction.LEFT
+                elif droplet.direction == Direction.RIGHT:
+                    droplet.direction = Direction.DOWN
+                elif droplet.direction == Direction.LEFT:
+                    droplet.direction = Direction.UP
+                droplet.x = new_x
+                droplet.y = new_y
+                new_positions.append((droplet, new_x, new_y))
             elif target_cell == ' ':
                 # Empty space - move droplet
                 droplet.x = new_x
@@ -200,3 +237,14 @@ class Engine:
     def __repr__(self) -> str:
         """Return detailed string representation of the engine."""
         return f"Engine(grid={self.grid!r}, droplets={self.droplets!r})"
+
+if __name__ == '__main__':
+    grid = Grid.from_string('''
+      /  
+    ''')
+    print(grid)
+    droplet = Droplet(0, 1, 0, Direction.DOWN)
+    engine = Engine(grid)
+    engine.droplets = [droplet]
+    engine.tick()
+    print(droplet.direction)

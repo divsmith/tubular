@@ -114,7 +114,7 @@ This document outlines a minimal, incremental, and testable plan for implementin
 
 ---
 
-### [ ] Step 7: Conditional Branching
+### [x] Step 7: Conditional Branching
 
 **Goal:** Implement the core logic pipes, `/` and `\`, to allow for conditional execution. This is a major milestone.
 
