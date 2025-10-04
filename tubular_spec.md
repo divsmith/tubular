@@ -50,11 +50,14 @@ Corner pipes are the core of flow redirection, looping, and conditional logic. T
 *   `0`-`9`: **Number Source.** When a droplet hits a number character, that character emits a new droplet downwards with the corresponding integer value. The original droplet is destroyed.
 *   `>`: **Tape Reader.** When a droplet hits this character, it begins reading all adjacent characters to its right until it hits a whitespace or a pipe character. For each character read, it emits a new droplet downwards containing that character's ASCII value. The original droplet is destroyed.
 *   `?`: **Character Input.** Halts execution and waits for user input from the standard input stream. It reads a single character and replaces the droplet's value with the character's ASCII code. On End-of-File (EOF), it sets the droplet's value to -1.
+*   `??`: **Numeric Input.** Halts execution and waits for user input from the standard input stream. It reads a line of input and attempts to parse it as an integer. If successful, it replaces the droplet's value with the parsed integer. If parsing fails or EOF is reached, it sets the droplet's value to 0.
 
 ### 2.4. Data Sinks
 *   `!`: **Output Sink.** Consumes any droplet that enters it.
     *   If the droplet was created by a Tape Reader (`>`), its value is interpreted as an ASCII code and the corresponding character is printed to the console.
     *   Otherwise, the droplet's integer value is printed, followed by a newline.
+*   `,`: **Character Output.** Consumes any droplet that enters it and prints the droplet's value as an ASCII character to the console (no newline).
+*   `n`: **Numeric Output.** Consumes any droplet that enters it and prints the droplet's integer value to the console (no newline).
 
 ### 2.5. Unary Operators
 These operators modify the value of a droplet that passes through them.
@@ -72,9 +75,15 @@ Tubular includes a global LIFO data stack for temporary value storage.
 *   `S`: **Subtract.** Pops two values (`a` and `b`) from the data stack, calculates `b - a`, and pushes the result back onto the stack. The droplet is destroyed.
 *   `M`: **Multiply.** Pops two values (`a` and `b`) from the data stack, calculates `b * a`, and pushes the result back onto the stack. The droplet is destroyed.
 *   `D`: **Divide.** Pops two values (`a` and `b`) from the data stack, calculates integer division `b / a`, and pushes the result back onto the stack. The droplet is destroyed.
+*   `=`: **Equal.** Pops two values (`a` and `b`) from the data stack, pushes `1` if `b == a`, otherwise pushes `0`. The droplet is destroyed.
+*   `<`: **Less Than.** Pops two values (`a` and `b`) from the data stack, pushes `1` if `b < a`, otherwise pushes `0`. The droplet is destroyed.
+*   `>`: **Greater Than.** Pops two values (`a` and `b`) from the data stack, pushes `1` if `b > a`, otherwise pushes `0`. The droplet is destroyed.
+*   `%`: **Modulo.** Pops two values (`a` and `b`) from the data stack, calculates `b % a` (remainder of `b` divided by `a`), and pushes the result back onto the stack. The droplet is destroyed.
 
 ### 2.7. Reservoir (Random-Access Memory) Operators
 For more complex data structures, Tubular provides a 2D random-access memory grid called "The Reservoir".
+
+The Reservoir supports negative coordinates and is unbounded, expanding dynamically as needed. Uninitialized Reservoir locations contain the value `0`.
 
 *   `G`: **Get.** Pops a `y` then an `x` coordinate from the data stack. Reads the value from The Reservoir at `(x, y)` and pushes it onto the data stack.
 *   `P`: **Put.** Pops a `y`, an `x`, and a `value` from the data stack. Writes the `value` to The Reservoir at `(x, y)`.
@@ -126,3 +135,19 @@ To facilitate code re-use and organization, Tubular supports subroutines via a d
 2
 1
 ```
+
+## 4. Implementation Guidelines and Limitations
+
+### 4.1. Integer Representation
+Implementations should support arbitrary precision integers to ensure Turing completeness. While smaller implementations may use 32-bit or 64-bit signed integers for performance, this may limit the language's computational power for certain algorithms.
+
+### 4.2. Stack Depth Limits
+The data stack should support a minimum depth of 1000 levels to enable complex algorithms. Implementations may support deeper stacks but should not impose artificial limitations below this threshold.
+
+### 4.3. Grid Size Limitations
+The program grid should support a minimum size of 1000x1000 cells to accommodate complex programs. Implementations may support larger grids but should not impose artificial limitations below this threshold.
+
+### 4.4. Edge Case Behavior
+*   **Division by Zero:** The `D` (Divide) operator should handle division by zero by pushing `0` as the result.
+*   **Stack Underflow:** When popping from an empty stack, operations should return `0` as the popped value rather than causing an error.
+*   **Modulo by Zero:** The `%` (Modulo) operator should handle modulo by zero by returning `0` as the result.
