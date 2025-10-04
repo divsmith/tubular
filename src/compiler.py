@@ -16,12 +16,17 @@ this file will be developed to include:
 - Reservoir (memory) management
 - Subroutine support
 
-Current Status: Step 0 - Project Setup Complete
-Next: Step 1 - Core Data Structures (Grid and Droplet classes)
+Current Status: Step 1 - Core Data Structures Complete
+Next: Step 2 - Execution Engine Implementation
 """
 
 import sys
 import argparse
+
+# Import core data structures for Step 1
+from .grid import Grid
+from .droplet import Droplet
+from .direction import Direction
 
 
 def main():
@@ -38,14 +43,15 @@ def main():
         print()
         print("Usage: python compiler.py <file.tub>")
         print()
-        print("This is a placeholder compiler created during Step 0.")
-        print("The actual implementation will be developed in subsequent steps.")
+        print("Step 1 Complete: Core data structures (Grid, Droplet, Direction) implemented.")
+        print("The actual execution engine will be developed in subsequent steps.")
         print()
         print("See implementation_checklist.md for the development plan.")
         return 0
 
-    print(f"Compiling/Executing: {args.file}")
-    print("Feature not yet implemented - see Step 1 in implementation_checklist.md")
+    print(f"Loading grid from: {args.file}")
+    print("Core data structures ready - execution engine not yet implemented.")
+    print("See Step 2 in implementation_checklist.md")
     return 0
 
 
