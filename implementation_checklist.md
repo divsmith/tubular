@@ -55,7 +55,7 @@ This document outlines a minimal, incremental, and testable plan for implementin
 
 ---
 
-- [ ] ### Step 3: Basic Flow Control Pipes
+- [x] ### Step 3: Basic Flow Control Pipes
 
 **Goal:** Implement the simplest pipes that redirect droplet flow without changing values.
 
