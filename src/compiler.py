@@ -30,16 +30,12 @@ try:
     from .droplet import Droplet
     from .direction import Direction
     from .engine import Engine
-    from .parser import TubularParser, ParsedProgram
-    from .errors import ErrorReporter
 except ImportError:
     # Fall back to absolute imports (when run as script)
     from grid import Grid
     from droplet import Droplet
     from direction import Direction
     from engine import Engine
-    from parser import TubularParser, ParsedProgram
-    from errors import ErrorReporter
 
 
 def main():
@@ -47,10 +43,6 @@ def main():
     parser = argparse.ArgumentParser(description='Tubular Language Compiler/Interpreter')
     parser.add_argument('file', nargs='?', help='Tubular source file to execute')
     parser.add_argument('--version', action='version', version='Tubular Compiler v0.1.0')
-    parser.add_argument('--validate', action='store_true',
-                       help='Validate program structure before execution')
-    parser.add_argument('--strict', action='store_true',
-                       help='Enable strict validation mode (exit on warnings)')
 
     args = parser.parse_args()
 
@@ -59,16 +51,9 @@ def main():
         print("=====================================")
         print()
         print("Usage: python compiler.py <file.tub>")
-        print("       python compiler.py --validate <file.tub>")
-        print("       python compiler.py --strict <file.tub>")
-        print()
-        print("Options:")
-        print("  --validate    Validate program structure before execution")
-        print("  --strict      Enable strict validation mode (exit on warnings)")
         print()
         print("Step 4 Complete: Program Start (@) and Numeric Output (n) implemented.")
         print("The execution engine is now functional with basic program execution.")
-        print("Parser integration available with --validate flag.")
         print()
         print("See implementation_checklist.md for the development plan.")
         return 0
@@ -78,42 +63,8 @@ def main():
         grid = Grid.from_file(args.file)
         print(f"Loaded grid from: {args.file}")
 
-        # Initialize parser and parsed program
-        parser = TubularParser()
-        parsed_program = None
-
-        # Optionally run parser for validation
-        if args.validate or args.strict:
-            print("Running parser validation...")
-            parsed_program = parser.parse_from_file(args.file)
-
-            # Display parsing results
-            if parser.get_errors():
-                print("Parsing errors found:")
-                parser.print_errors()
-                if args.strict:
-                    print("Strict mode: Exiting due to parsing errors.")
-                    return 1
-
-            if parser.get_warnings():
-                print("Parsing warnings:")
-                parser.print_warnings()
-                if args.strict:
-                    print("Strict mode: Exiting due to parsing warnings.")
-                    return 1
-
-            if parsed_program and parsed_program.has_valid_structure:
-                print("✓ Program structure is valid")
-                if parsed_program.entry_point:
-                    print(f"✓ Entry point found at {parsed_program.entry_point}")
-                if parsed_program.unreachable_positions:
-                    print(f"⚠ Warning: {len(parsed_program.unreachable_positions)} unreachable positions detected")
-            else:
-                print("✗ Program structure validation failed")
-                return 1
-
         # Create engine and run the program
-        engine = Engine(grid, parsed_program)
+        engine = Engine(grid)
         print("Executing program...")
 
         # Run the execution loop until no droplets remain
