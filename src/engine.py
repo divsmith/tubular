@@ -139,6 +139,18 @@ class Engine:
                 # Numeric output - print droplet value and destroy droplet
                 print(droplet.value)
                 droplets_to_remove.append(droplet)
+            elif target_cell == '+':
+                # Increment operator - add 1 to droplet value and move
+                droplet.value += 1
+                droplet.x = new_x
+                droplet.y = new_y
+                new_positions.append((droplet, new_x, new_y))
+            elif target_cell == '~':
+                # Decrement operator - subtract 1 from droplet value and move
+                droplet.value -= 1
+                droplet.x = new_x
+                droplet.y = new_y
+                new_positions.append((droplet, new_x, new_y))
             elif target_cell == ' ':
                 # Empty space - move droplet
                 droplet.x = new_x

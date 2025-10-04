@@ -30,12 +30,14 @@ try:
     from .droplet import Droplet
     from .direction import Direction
     from .engine import Engine
+    from .parser import TubFileParser
 except ImportError:
     # Fall back to absolute imports (when run as script)
     from grid import Grid
     from droplet import Droplet
     from direction import Direction
     from engine import Engine
+    from parser import TubFileParser
 
 
 def main():
@@ -59,8 +61,9 @@ def main():
         return 0
 
     try:
-        # Load the grid from file
-        grid = Grid.from_file(args.file)
+        # Load the grid from file using TubFileParser
+        parser = TubFileParser()
+        grid = parser.parse_file(args.file)
         print(f"Loaded grid from: {args.file}")
 
         # Create engine and run the program

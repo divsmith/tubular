@@ -71,7 +71,7 @@ This document outlines a minimal, incremental, and testable plan for implementin
 
 ---
 
-### [ ] Step 5: File Loading and Parsing
+### [x] Step 5: File Loading and Parsing
 
 **Goal:** Define a standard way to load Tubular programs from `.tub` files, replacing the need for hardcoded grids.
 
