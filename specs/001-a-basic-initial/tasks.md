@@ -3,7 +3,7 @@
 **Input**: Design documents from `/specs/001-a-basic-initial/`
 **Prerequisites**: plan.md (completed), spec.md (completed for user stories), research.md, data-model.md, contracts/
 
-**Tests**: Tests are OPTIONAL for this feature - test tasks are only included if explicitly requested by the user or required for validation.
+**Tests**: Tests are MANDATORY for this feature - comprehensive testing is required by constitution principle IV (Test-Driven Language Design). Test tasks are included for all core functionality.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -46,8 +46,10 @@
 - [ ] T013 [P] Create program validator in src/parser/validator.rs for start symbols and syntax
 - [ ] T014 [P] Implement basic error types and handling in src/types/error.rs
 - [ ] T015 [P] Create CLI argument structure in src/cli/commands.rs with clap derive macros
-- [ ] T016 Setup test utilities and fixtures in tests/common/mod.rs
-- [ ] T017 Create example program files in examples/ directory for testing
+- [ ] T016 [P] Implement arbitrary precision integer type in src/types/bigint.rs using num-bigint crate
+- [ ] T017 [P] Create arithmetic operations for arbitrary precision in src/operations/bigint_arith.rs
+- [ ] T018 Setup test utilities and fixtures in tests/common/mod.rs
+- [ ] T019 Create example program files in examples/ directory for testing
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -61,16 +63,16 @@
 
 ### Implementation for User Story 1
 
-- [ ] T018 [US1] Implement flow control operations in src/operations/flow_control.rs (|, -, ^, /, \ pipes)
-- [ ] T019 [US1] Implement data source operations in src/operations/arithmetic.rs (0-9 literals, > tape reader)
-- [ ] T020 [US1] Implement data sink operations in src/operations/io.rs (! output, , character output, n numeric output)
-- [ ] T021 [US1] Create core execution engine in src/interpreter/execution.rs with tick-based simulation
-- [ ] T022 [US1] Implement droplet movement and collision detection in src/interpreter/collision.rs
-- [ ] T023 [US1] Create main execution loop in src/interpreter/mod.rs
-- [ ] T024 [US1] Implement basic CLI run command in src/cli/commands.rs
-- [ ] T025 [US1] Add verbose output formatting in src/cli/output.rs
-- [ ] T026 [US1] Create Hello World example in examples/hello_world.tb
-- [ ] T027 [US1] Add basic integration tests for Hello World execution in tests/integration/test_hello_world.rs
+- [ ] T020 [US1] Implement flow control operations in src/operations/flow_control.rs (|, -, ^, /, \ pipes)
+- [ ] T021 [US1] Implement data source operations in src/operations/arithmetic.rs (0-9 literals, > tape reader)
+- [ ] T022 [US1] Implement data sink operations in src/operations/io.rs (! output, , character output, n numeric output)
+- [ ] T023 [US1] Create core execution engine in src/interpreter/execution.rs with tick-based simulation
+- [ ] T024 [US1] Implement droplet movement and collision detection in src/interpreter/collision.rs
+- [ ] T025 [US1] Create main execution loop in src/interpreter/mod.rs
+- [ ] T026 [US1] Implement basic CLI run command in src/cli/commands.rs
+- [ ] T027 [US1] Add verbose output formatting in src/cli/output.rs
+- [ ] T028 [US1] Create Hello World example in examples/hello_world.tb
+- [ ] T029 [US1] Add basic integration tests for Hello World execution in tests/integration/test_hello_world.rs
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -84,13 +86,13 @@
 
 ### Implementation for User Story 2
 
-- [ ] T028 [P] [US2] Implement character input (?) in src/operations/io.rs with stdin reading
-- [ ] T029 [P] [US2] Implement numeric input (??) in src/operations/io.rs with parsing
-- [ ] T030 [US2] Enhance CLI with interactive mode support in src/cli/commands.rs
-- [ ] T031 [US2] Add input buffering and validation in src/operations/io.rs
-- [ ] T032 [US2] Create interactive calculator example in examples/calculator.tb
-- [ ] T033 [US2] Add integration tests for I/O operations in tests/integration/test_io.rs
-- [ ] T034 [US2] Implement CLI subcommand 'run' with interactive flag in src/cli/commands.rs
+- [ ] T030 [P] [US2] Implement character input (?) in src/operations/io.rs with stdin reading
+- [ ] T031 [P] [US2] Implement numeric input (??) in src/operations/io.rs with parsing
+- [ ] T032 [US2] Enhance CLI with interactive mode support in src/cli/commands.rs
+- [ ] T033 [US2] Add input buffering and validation in src/operations/io.rs
+- [ ] T034 [US2] Create interactive calculator example in examples/calculator.tb
+- [ ] T035 [US2] Add integration tests for I/O operations in tests/integration/test_io.rs
+- [ ] T036 [US2] Implement CLI subcommand 'run' with interactive flag in src/cli/commands.rs
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -104,15 +106,15 @@
 
 ### Implementation for User Story 3
 
-- [ ] T035 [P] [US3] Implement unary operators (+, ~) in src/operations/arithmetic.rs
-- [ ] T036 [P] [US3] Implement stack operations (:, ;, d) in src/operations/arithmetic.rs
-- [ ] T037 [P] [US3] Implement arithmetic operators (A, S, M, D) in src/operations/arithmetic.rs
-- [ ] T038 [P] [US3] Implement comparison operators (=, <, >, %) in src/operations/arithmetic.rs
-- [ ] T039 [US3] Enhance flow control with conditional branching in src/operations/flow_control.rs
-- [ ] T040 [US3] Implement division by zero and modulo by zero handling (return 0)
-- [ ] T041 [US3] Create countdown example in examples/countdown.tb
-- [ ] T042 [US3] Add integration tests for arithmetic operations in tests/integration/test_arithmetic.rs
-- [ ] T043 [US3] Add property-based tests for stack operations in tests/property/test_stack.rs
+- [ ] T037 [P] [US3] Implement unary operators (+, ~) in src/operations/arithmetic.rs
+- [ ] T038 [P] [US3] Implement stack operations (:, ;, d) in src/operations/arithmetic.rs
+- [ ] T039 [P] [US3] Implement arithmetic operators (A, S, M, D) in src/operations/arithmetic.rs
+- [ ] T040 [P] [US3] Implement comparison operators (=, <, >, %) in src/operations/arithmetic.rs
+- [ ] T041 [US3] Enhance flow control with conditional branching in src/operations/flow_control.rs
+- [ ] T042 [US3] Implement division by zero and modulo by zero handling (return 0)
+- [ ] T043 [US3] Create countdown example in examples/countdown.tb
+- [ ] T044 [US3] Add integration tests for arithmetic operations in tests/integration/test_arithmetic.rs
+- [ ] T045 [US3] Add property-based tests for stack operations in tests/property/test_stack.rs
 
 **Checkpoint**: At this point, User Stories 1, 2, AND 3 should all work independently
 
@@ -126,15 +128,15 @@
 
 ### Implementation for User Story 4
 
-- [ ] T044 [P] [US4] Implement reservoir Get operation in src/operations/memory.rs with coordinate calculation
-- [ ] T045 [P] [US4] Implement reservoir Put operation in src/operations/memory.rs with coordinate calculation
-- [ ] T046 [P] [US4] Implement subroutine Call operation in src/operations/subroutines.rs with stack management
-- [ ] T047 [P] [US4] Implement subroutine Return operation in src/operations/subroutines.rs with underflow handling
-- [ ] T048 [US4] Enhance coordinate system to support negative coordinates in src/types/coordinate.rs
-- [ ] T049 [US4] Create memory test example in examples/memory_test.tb
-- [ ] T050 [US4] Create subroutine example in examples/subroutine_test.tb
-- [ ] T051 [US4] Add integration tests for memory operations in tests/integration/test_memory.rs
-- [ ] T052 [US4] Add integration tests for subroutines in tests/integration/test_subroutines.rs
+- [ ] T046 [P] [US4] Implement reservoir Get operation in src/operations/memory.rs with coordinate calculation
+- [ ] T047 [P] [US4] Implement reservoir Put operation in src/operations/memory.rs with coordinate calculation
+- [ ] T048 [P] [US4] Implement subroutine Call operation in src/operations/subroutines.rs with stack management
+- [ ] T049 [P] [US4] Implement subroutine Return operation in src/operations/subroutines.rs with underflow handling
+- [ ] T050 [US4] Enhance coordinate system to support negative coordinates in src/types/coordinate.rs
+- [ ] T051 [US4] Create memory test example in examples/memory_test.tb
+- [ ] T052 [US4] Create subroutine example in examples/subroutine_test.tb
+- [ ] T053 [US4] Add integration tests for memory operations in tests/integration/test_memory.rs
+- [ ] T054 [US4] Add integration tests for subroutines in tests/integration/test_subroutines.rs
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -144,19 +146,22 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T053 [P] Implement execution tracing in src/cli/output.rs with detailed step-by-step output
-- [ ] T054 [P] Add performance benchmarking in benches/ directory using criterion
-- [ ] T055 [P] Implement tick limit and timeout handling in src/interpreter/execution.rs
-- [ ] T056 [P] Add comprehensive error messages with line/column context in src/parser/validator.rs
-- [ ] T057 [P] Create CLI validate subcommand in src/cli/commands.rs for syntax checking
-- [ ] T058 [P] Implement CLI benchmark subcommand in src/cli/commands.rs
-- [ ] T059 [P] Add environment variable support in src/cli/commands.rs
-- [ ] T060 [P] Create comprehensive unit test suite in tests/unit/
-- [ ] T061 [P] Add property-based tests for core invariants in tests/property/
-- [ ] T062 Update README.md with usage examples and getting started guide
-- [ ] T063 Create language reference documentation in docs/language_reference.md
-- [ ] T064 Add performance optimization for large grids (spatial partitioning)
-- [ ] T065 Implement memory usage optimization for large droplet counts
+- [ ] T055 [P] Implement execution tracing in src/cli/output.rs with detailed step-by-step output
+- [ ] T056 [P] Add performance benchmarking in benches/ directory using criterion
+- [ ] T057 [P] Implement tick limit and timeout handling in src/interpreter/execution.rs
+- [ ] T058 [P] Add comprehensive error messages with line/column context in src/parser/validator.rs
+- [ ] T059 [P] Create CLI validate subcommand in src/cli/commands.rs for syntax checking
+- [ ] T060 [P] Implement CLI benchmark subcommand in src/cli/commands.rs
+- [ ] T061 [P] Add environment variable support in src/cli/commands.rs
+- [ ] T062 [P] Create comprehensive unit test suite in tests/unit/
+- [ ] T063 [P] Add property-based tests for core invariants in tests/property/
+- [ ] T064 [P] Add grid size validation in src/parser/validator.rs for 1000x1000 minimum support
+- [ ] T065 [P] Implement stack depth monitoring in src/interpreter/stack.rs with 1000-level validation
+- [ ] T066 [P] Add integration tests for maximum grid and stack limits in tests/integration/test_limits.rs
+- [ ] T067 Update README.md with usage examples and getting started guide
+- [ ] T068 Create language reference documentation in docs/language_reference.md
+- [ ] T069 Add performance optimization for large grids (spatial partitioning)
+- [ ] T070 Implement memory usage optimization for large droplet counts
 
 ---
 

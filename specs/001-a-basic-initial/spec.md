@@ -115,7 +115,7 @@ A developer needs to implement complex data structures and reusable code using t
 ### Measurable Outcomes
 
 - **SC-001**: The interpreter successfully executes the Hello World example program and produces correct output within 1 second
-- **SC-002**: The interpreter handles complex programs with up to 1000 active droplets without performance degradation exceeding 10% per 100 additional droplets
+- **SC-002**: The interpreter handles complex programs with up to 1000 active droplets with baseline performance of <10ms per tick, allowing no more than 10% degradation per 100 additional droplets
 - **SC-003**: All provided example programs from the language specification execute successfully and produce expected outputs
 - **SC-004**: The interpreter correctly handles edge cases (division by zero, stack underflow, etc.) without crashing or producing undefined behavior
 - **SC-005**: Programs utilizing all major language features (I/O, arithmetic, memory, subroutines) can be executed to completion
