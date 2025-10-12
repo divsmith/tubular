@@ -1,0 +1,22 @@
+[package]
+name = "tubular"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+ndarray = "0.15"
+num-bigint = "0.4"
+num-traits = "0.2"
+anyhow = "1.0"
+thiserror = "1.0"
+proptest = "1.0"
+criterion = "0.5"
+
+[dev-dependencies]
+proptest = "1.0"
+criterion = "0.5"
+
+[[bench]]
+name = "performance"
+harness = false
