@@ -189,8 +189,9 @@ mod tests {
     use crate::types::direction::Direction;
 
     fn create_test_droplet(id: u64, value: i64) -> Droplet {
-        Droplet::new(id, Coordinate::new(0, 0), Direction::Down)
-            .with_value(TubularBigInt::new(value))
+        let mut droplet = Droplet::new(id, Coordinate::new(0, 0), Direction::Down);
+        droplet.set_value(TubularBigInt::new(value));
+        droplet
     }
 
     #[test]

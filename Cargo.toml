@@ -17,6 +17,10 @@ criterion = "0.5"
 proptest = "1.0"
 criterion = "0.5"
 
+[[test]]
+name = "integration"
+path = "tests/integration/test_hello_world.rs"
+
 [[bench]]
 name = "performance"
 harness = false

@@ -385,6 +385,9 @@ impl TubularInterpreter {
                         droplet,
                         &mut self.state.stack,
                     )?;
+
+                    // After processing the operation, move the droplet forward
+                    droplet.move_to(droplet.next_position());
                 }
             }
         }
