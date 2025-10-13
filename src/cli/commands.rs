@@ -623,15 +623,11 @@ impl Cli {
 
     /// Execute a program file
     fn execute_program(&self, file_path: &str, config: &EnvConfig) -> Result<()> {
-        eprintln!("DEBUG: Starting execute_program for {}", file_path);
-
         // Read and parse the program
-        eprintln!("DEBUG: Reading file...");
         let content = fs::read_to_string(file_path)
             .map_err(|e| InterpreterError::System(
                 crate::types::error::SystemError::IoError(e.to_string())
             ))?;
-        eprintln!("DEBUG: File read successfully, {} bytes", content.len());
 
         if config.verbose {
             eprintln!("Parsing program: {}", file_path);
@@ -674,6 +670,14 @@ impl Cli {
                     eprintln!("  Total ticks: {}", result.total_ticks);
                     eprintln!("  Max droplets: {}", result.max_droplets);
                     eprintln!("  Max stack depth: {}", result.max_stack_depth);
+                }
+
+                // Print program output if there is any
+                if !result.final_output.is_empty() {
+                    print!("{}", result.final_output);
+                    // Flush stdout to ensure output is displayed immediately
+                    use std::io::Write;
+                    std::io::stdout().flush().unwrap_or_default();
                 }
             }
             crate::interpreter::execution::ExecutionStatus::TickTimeout(ticks) => {
@@ -754,6 +758,14 @@ impl Cli {
                     eprintln!("  Total ticks: {}", result.total_ticks);
                     eprintln!("  Max droplets: {}", result.max_droplets);
                     eprintln!("  Max stack depth: {}", result.max_stack_depth);
+                }
+
+                // Print program output if there is any
+                if !result.final_output.is_empty() {
+                    print!("{}", result.final_output);
+                    // Flush stdout to ensure output is displayed immediately
+                    use std::io::Write;
+                    std::io::stdout().flush().unwrap_or_default();
                 }
 
                 if interactive {

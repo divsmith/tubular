@@ -34,15 +34,39 @@ cargo install tubular
 
 ### Your First Program
 
+Create a file called `simple.tb` with this content:
+
+```
+@       # Start point
+|       # Vertical pipe
+7       # Number 7
+2       # Number 2
+-
+n       # Output as number
+!       # Output sink
+```
+
+Run it:
+```bash
+tubular simple.tb
+```
+
+Output:
+```
+22
+```
+
+#### Character Output Example
+
 Create a file called `hello.tb` with this content:
 
 ```
 @       # Start point
 |       # Vertical pipe
->       # Tape reader
-Hello, World!    # Text to output
-|       # Vertical pipe
-!       # Output sink
+7       # Number 7 (creates a droplet with value 7)
+-
+,       # Character output (outputs ASCII character 7: bell)
+!
 ```
 
 Run it:
@@ -52,8 +76,10 @@ tubular hello.tb
 
 Output:
 ```
-Hello, World!
+[bell sound]
 ```
+
+This example demonstrates how to output a character using the comma operator.
 
 ## 📖 Tutorial
 
@@ -359,7 +385,7 @@ tubular --trace program.tb  # Monitor stack operations
 
 #### Data Sources
 - `0-9` - Number literals (create droplets with that value)
-- `>` - Tape reader (emits ASCII values for adjacent characters)
+- `>` - Greater than flow control or operator
 - `?` - Character input (read single character, returns ASCII code or -1 for EOF)
 - `??` - Numeric input (read line, parse as integer, returns 0 on parse failure)
 
