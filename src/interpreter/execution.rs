@@ -3,15 +3,84 @@ use crate::types::direction::Direction;
 use crate::types::bigint::TubularBigInt;
 use crate::types::error::{Result, InterpreterError, ExecError};
 use crate::interpreter::droplet::{Droplet, DropletId};
-use crate::interpreter::grid::{ProgramGrid, ProgramCell};
+use crate::interpreter::grid::ProgramGrid;
 use crate::interpreter::stack::DataStack;
 use crate::interpreter::memory::Reservoir;
-use crate::interpreter::subroutines::{CallStack, StackFrame};
+use crate::interpreter::subroutines::CallStack;
 use crate::operations::arithmetic::ArithmeticOperations;
 use crate::operations::io::IoOperations;
 use crate::operations::flow_control::FlowControlOperations;
 use std::collections::{HashMap, HashSet};
 use std::io::{self, Write};
+use std::time::Instant;
+
+/// Configuration for execution limits and timeouts
+#[derive(Debug, Clone)]
+pub struct ExecutionLimits {
+    /// Maximum number of ticks before hard timeout (None = no limit)
+    pub max_ticks: Option<u64>,
+    /// Maximum wall-clock time before hard timeout in ms (None = no limit)
+    pub max_time_ms: Option<u64>,
+    /// Soft tick limit for warnings (None = no warnings)
+    pub soft_tick_limit: Option<u64>,
+    /// Soft time limit for warnings in ms (None = no warnings)
+    pub soft_time_limit_ms: Option<u64>,
+    /// Progress reporting interval in ticks (None = no progress reports)
+    pub progress_interval: Option<u64>,
+}
+
+impl Default for ExecutionLimits {
+    fn default() -> Self {
+        Self {
+            max_ticks: Some(1000),
+            max_time_ms: Some(5000), // 5 seconds default
+            soft_tick_limit: Some(800), // Warn at 80% of hard limit
+            soft_time_limit_ms: Some(4000), // Warn at 80% of hard limit
+            progress_interval: Some(100), // Report every 100 ticks
+        }
+    }
+}
+
+impl ExecutionLimits {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_max_ticks(mut self, max_ticks: Option<u64>) -> Self {
+        self.max_ticks = max_ticks;
+        self
+    }
+
+    pub fn with_max_time_ms(mut self, max_time_ms: Option<u64>) -> Self {
+        self.max_time_ms = max_time_ms;
+        self
+    }
+
+    pub fn with_soft_tick_limit(mut self, soft_limit: Option<u64>) -> Self {
+        self.soft_tick_limit = soft_limit;
+        self
+    }
+
+    pub fn with_soft_time_limit_ms(mut self, soft_limit: Option<u64>) -> Self {
+        self.soft_time_limit_ms = soft_limit;
+        self
+    }
+
+    pub fn with_progress_interval(mut self, interval: Option<u64>) -> Self {
+        self.progress_interval = interval;
+        self
+    }
+
+    pub fn unlimited() -> Self {
+        Self {
+            max_ticks: None,
+            max_time_ms: None,
+            soft_tick_limit: None,
+            soft_time_limit_ms: None,
+            progress_interval: None,
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct ExecutionState {
@@ -38,7 +107,15 @@ pub enum ExecutionStatus {
     Running,
     Completed,
     Error(InterpreterError),
-    Timeout(u64), // tick limit reached
+    TickTimeout(u64), // tick limit reached
+    WallClockTimeout(u64), // wall-clock time limit reached in ms
+    Warning(ExecutionWarning), // soft limit warning
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ExecutionWarning {
+    SoftTickLimit(u64),
+    SoftTimeLimit(u64),
 }
 
 #[derive(Debug, Clone)]
@@ -56,6 +133,18 @@ pub struct ExecutionResult {
     pub status: ExecutionStatus,
     pub max_droplets: usize,
     pub max_stack_depth: usize,
+    pub execution_time_ms: u64,
+    pub warnings_issued: Vec<ExecutionWarning>,
+    pub progress_reports: Vec<ProgressReport>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ProgressReport {
+    pub tick: u64,
+    pub elapsed_time_ms: u64,
+    pub active_droplets: usize,
+    pub total_collisions: usize,
+    pub stack_depth: usize,
 }
 
 /// Main interpreter that executes Tubular programs
@@ -64,7 +153,11 @@ pub struct TubularInterpreter {
     grid: ProgramGrid,
     verbose: bool,
     trace: bool,
-    max_ticks: Option<u64>,
+    limits: ExecutionLimits,
+    start_time: Option<Instant>,
+    warnings_issued: Vec<ExecutionWarning>,
+    progress_reports: Vec<ProgressReport>,
+    total_collisions: usize,
 }
 
 impl TubularInterpreter {
@@ -97,16 +190,38 @@ impl TubularInterpreter {
             grid,
             verbose: false,
             trace: false,
-            max_ticks: Some(1000), // Add default tick limit to prevent infinite loops
+            limits: ExecutionLimits::default(),
+            start_time: None,
+            warnings_issued: Vec::new(),
+            progress_reports: Vec::new(),
+            total_collisions: 0,
         })
     }
 
-    /// Set execution options
+    /// Set execution options (maintains backward compatibility)
     pub fn with_options(mut self, verbose: bool, trace: bool, max_ticks: Option<u64>) -> Self {
         self.verbose = verbose;
         self.trace = trace;
-        self.max_ticks = max_ticks;
+        if let Some(max_ticks) = max_ticks {
+            self.limits.max_ticks = Some(max_ticks);
+        }
         self
+    }
+
+    /// Set execution limits with full control
+    pub fn with_limits(mut self, limits: ExecutionLimits) -> Self {
+        self.limits = limits;
+        self
+    }
+
+    /// Get current execution limits
+    pub fn limits(&self) -> &ExecutionLimits {
+        &self.limits
+    }
+
+    /// Get elapsed execution time in milliseconds
+    pub fn elapsed_time_ms(&self) -> Option<u64> {
+        self.start_time.map(|start| start.elapsed().as_millis() as u64)
     }
 
     /// Get current execution state
@@ -125,16 +240,60 @@ impl TubularInterpreter {
             });
         }
 
-        // Check tick limit
-        if let Some(max_ticks) = self.max_ticks {
+        // Initialize start time if this is the first tick
+        if self.start_time.is_none() {
+            self.start_time = Some(Instant::now());
+        }
+
+        let elapsed_ms = self.elapsed_time_ms().unwrap_or(0);
+
+        // Check hard limits first
+        if let Some(max_ticks) = self.limits.max_ticks {
             if self.state.tick >= max_ticks {
-                self.state.status = ExecutionStatus::Timeout(max_ticks);
+                self.state.status = ExecutionStatus::TickTimeout(max_ticks);
+                self.cleanup();
                 return Ok(TickResult {
                     tick: self.state.tick,
                     droplets_active: 0,
                     collisions: 0,
                     output: None,
                 });
+            }
+        }
+
+        if let Some(max_time_ms) = self.limits.max_time_ms {
+            if elapsed_ms >= max_time_ms {
+                self.state.status = ExecutionStatus::WallClockTimeout(max_time_ms);
+                self.cleanup();
+                return Ok(TickResult {
+                    tick: self.state.tick,
+                    droplets_active: 0,
+                    collisions: 0,
+                    output: None,
+                });
+            }
+        }
+
+        // Check soft limits and issue warnings (but don't stop execution)
+        if let Some(soft_tick_limit) = self.limits.soft_tick_limit {
+            if self.state.tick >= soft_tick_limit && !self.warnings_issued.iter().any(|w| matches!(w, ExecutionWarning::SoftTickLimit(_))) {
+                let warning = ExecutionWarning::SoftTickLimit(soft_tick_limit);
+                self.warnings_issued.push(warning.clone());
+
+                if self.verbose {
+                    eprintln!("⚠️  Warning: Approaching tick limit ({} ticks)", soft_tick_limit);
+                }
+            }
+        }
+
+        if let Some(soft_time_limit_ms) = self.limits.soft_time_limit_ms {
+            if elapsed_ms >= soft_time_limit_ms && !self.warnings_issued.iter().any(|w| matches!(w, ExecutionWarning::SoftTimeLimit(_))) {
+                let warning = ExecutionWarning::SoftTimeLimit(soft_time_limit_ms);
+                self.warnings_issued.push(warning.clone());
+
+                if self.verbose {
+                    eprintln!("⚠️  Warning: Approaching time limit ({}ms)", soft_time_limit_ms);
+                }
             }
         }
 
@@ -282,6 +441,7 @@ impl TubularInterpreter {
                 for id in droplet_ids {
                     destroyed_droplets.insert(*id);
                 }
+                self.total_collisions += droplet_ids.len();
                 if self.verbose {
                     eprintln!("[TICK {:05}] Collision at {} - {} droplets destroyed",
                         self.state.tick, position, droplet_ids.len());
@@ -305,10 +465,32 @@ impl TubularInterpreter {
             self.state.status = ExecutionStatus::Completed;
         }
 
+        // Progress reporting
+        if let Some(progress_interval) = self.limits.progress_interval {
+            if self.state.tick % progress_interval == 0 {
+                let progress_report = ProgressReport {
+                    tick: self.state.tick,
+                    elapsed_time_ms: elapsed_ms,
+                    active_droplets: self.state.droplets.len(),
+                    total_collisions: self.total_collisions,
+                    stack_depth: self.state.stack.depth(),
+                };
+                self.progress_reports.push(progress_report.clone());
+
+                if self.verbose {
+                    eprintln!("[PROGRESS] Tick: {}, Time: {}ms, Droplets: {}, Collisions: {}, Stack: {}",
+                        progress_report.tick, progress_report.elapsed_time_ms, progress_report.active_droplets,
+                        progress_report.total_collisions, progress_report.stack_depth);
+                }
+            }
+        }
+
         // Debug: Print droplet positions
-        for droplet in &self.state.droplets {
-            eprintln!("DEBUG: Droplet {} at {} direction: {}, active: {}",
-                droplet.id, droplet.position, droplet.direction, droplet.active);
+        if self.trace {
+            for droplet in &self.state.droplets {
+                eprintln!("DEBUG: Droplet {} at {} direction: {}, active: {}",
+                    droplet.id, droplet.position, droplet.direction, droplet.active);
+            }
         }
 
         // Add output from this tick
@@ -327,39 +509,64 @@ impl TubularInterpreter {
         Ok(result)
     }
 
-    /// Execute until completion or tick limit
+    /// Execute until completion or timeout
     pub fn run(&mut self) -> Result<ExecutionResult> {
-        eprintln!("DEBUG: Entering run() method");
+        // Initialize start time
+        self.start_time = Some(Instant::now());
+
         let mut max_droplets = self.state.droplets.len();
         let mut total_ticks = 0;
-        let mut tick_count = 0;
 
-        eprintln!("DEBUG: Starting execution loop, status: {:?}", self.state.status);
+        if self.verbose {
+            eprintln!("Starting execution with limits: {:?}", self.limits);
+        }
+
         while self.state.status == ExecutionStatus::Running {
-            tick_count += 1;
-            if tick_count > 10 {
-                eprintln!("DEBUG: Too many ticks, breaking to prevent infinite loop");
-                break;
-            }
-
-            eprintln!("DEBUG: Tick {} - Starting execute_tick()", tick_count);
             max_droplets = max_droplets.max(self.state.droplets.len());
 
             let tick_result = self.execute_tick()?;
             total_ticks = tick_result.tick;
-            eprintln!("DEBUG: Tick {} completed, status: {:?}, active droplets: {}",
-                tick_count, self.state.status, self.state.droplets.len());
 
             // Output immediate results if available
             if let Some(output) = tick_result.output {
                 print!("{}", output);
                 io::stdout().flush()?;
-                eprintln!("DEBUG: Output generated: {:?}", output);
             }
 
+            // Verbose logging
             if self.verbose {
                 eprintln!("[TICK {:05}] Active droplets: {}, Collisions: {}",
                     tick_result.tick, tick_result.droplets_active, tick_result.collisions);
+            }
+        }
+
+        // Handle timeout states with graceful shutdown
+        let execution_time_ms = self.elapsed_time_ms().unwrap_or(0);
+
+        // Report execution result
+        if self.verbose {
+            match &self.state.status {
+                ExecutionStatus::TickTimeout(limit) => {
+                    eprintln!("⏹️  Execution stopped: Tick limit of {} reached", limit);
+                }
+                ExecutionStatus::WallClockTimeout(limit) => {
+                    eprintln!("⏹️  Execution stopped: Time limit of {}ms reached", limit);
+                }
+                ExecutionStatus::Completed => {
+                    eprintln!("✅ Execution completed successfully");
+                }
+                ExecutionStatus::Error(error) => {
+                    eprintln!("❌ Execution failed: {}", error);
+                }
+                _ => {}
+            }
+        }
+
+        // Final progress report if we have any
+        if let Some(_last_progress) = self.progress_reports.last() {
+            if self.verbose {
+                eprintln!("Final stats: {} ticks, {}ms, {} max droplets, {} total collisions",
+                    total_ticks, execution_time_ms, max_droplets, self.total_collisions);
             }
         }
 
@@ -369,7 +576,34 @@ impl TubularInterpreter {
             status: self.state.status.clone(),
             max_droplets,
             max_stack_depth: self.state.stack.max_depth_reached(),
+            execution_time_ms,
+            warnings_issued: self.warnings_issued.clone(),
+            progress_reports: self.progress_reports.clone(),
         })
+    }
+
+    /// Perform graceful cleanup when execution is terminated
+    fn cleanup(&mut self) {
+        if self.verbose {
+            eprintln!("Performing graceful cleanup...");
+        }
+
+        // Clear all active droplets
+        self.state.droplets.clear();
+
+        // Clear any temporary resources
+        self.state.call_stack.clear();
+
+        // Mark as completed to prevent further execution
+        if matches!(self.state.status, ExecutionStatus::TickTimeout(_) | ExecutionStatus::WallClockTimeout(_)) {
+            // Keep the timeout status for reporting
+        } else {
+            self.state.status = ExecutionStatus::Completed;
+        }
+
+        if self.verbose {
+            eprintln!("Cleanup completed");
+        }
     }
 
     

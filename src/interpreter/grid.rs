@@ -51,6 +51,16 @@ impl ProgramCell {
     pub fn is_data_sink(symbol: char) -> bool {
         matches!(symbol, '!' | ',' | 'n')
     }
+
+    pub fn is_valid_symbol(symbol: char) -> bool {
+        Self::is_flow_control_symbol(symbol) ||
+        Self::is_operator_symbol(symbol) ||
+        Self::is_start_symbol(symbol) ||
+        Self::is_sink_symbol(symbol) ||
+        Self::is_data_source(symbol) ||
+        Self::is_data_sink(symbol) ||
+        symbol.is_ascii_digit()
+    }
 }
 
 #[derive(Debug, Clone)]
