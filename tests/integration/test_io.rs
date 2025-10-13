@@ -222,3 +222,215 @@ fn test_input_parsing_validation() {
                "Symbol '{}' should NOT be recognized as I/O operation", symbol);
     }
 }
+
+#[test]
+fn test_input_buffer_creation() {
+    use tubular::operations::io::{InputBuffer, ValidationMode};
+
+    // Test basic buffer creation
+    let buffer = InputBuffer::new();
+    assert_eq!(buffer.validation_mode(), ValidationMode::Lenient);
+
+    // Test buffer with predefined input
+    let buffer_with_input = InputBuffer::with_input("hello\nworld".to_string());
+    assert_eq!(buffer_with_input.validation_mode(), ValidationMode::Lenient);
+}
+
+#[test]
+fn test_validation_modes() {
+    use tubular::operations::io::ValidationMode;
+
+    // Test that validation modes are correctly implemented
+    assert_eq!(ValidationMode::Lenient, ValidationMode::Lenient);
+    assert_ne!(ValidationMode::Strict, ValidationMode::Lenient);
+    assert_ne!(ValidationMode::Permissive, ValidationMode::Strict);
+    assert_ne!(ValidationMode::Permissive, ValidationMode::Lenient);
+}
+
+#[test]
+fn test_numeric_validation_functions() {
+    use tubular::operations::io::IoOperations;
+
+    // Test integer validation
+    assert!(IoOperations::is_valid_integer("123"));
+    assert!(IoOperations::is_valid_integer("-456"));
+    assert!(IoOperations::is_valid_integer("0"));
+    assert!(!IoOperations::is_valid_integer(""));  // Empty string
+    assert!(!IoOperations::is_valid_integer("-"));  // Just minus
+    assert!(!IoOperations::is_valid_integer("12a3"));  // Contains letter
+    assert!(!IoOperations::is_valid_integer("12.3"));  // Contains decimal
+    assert!(!IoOperations::is_valid_integer("abc"));  // Only letters
+}
+
+#[test]
+fn test_number_extraction() {
+    use tubular::operations::io::IoOperations;
+
+    // Test number extraction from strings
+    assert_eq!(IoOperations::extract_number("123"), Some(123));
+    assert_eq!(IoOperations::extract_number("-456"), Some(-456));
+    assert_eq!(IoOperations::extract_number("abc123def"), Some(123));
+    assert_eq!(IoOperations::extract_number("abc-123def"), Some(-123));
+    assert_eq!(IoOperations::extract_number("abc"), None);
+    assert_eq!(IoOperations::extract_number(""), None);
+    assert_eq!(IoOperations::extract_number("-"), None);
+    assert_eq!(IoOperations::extract_number("123abc456"), Some(123)); // First number
+}
+
+#[test]
+fn test_intelligent_parsing() {
+    use tubular::operations::io::IoOperations;
+
+    // Test direct numbers
+    assert_eq!(IoOperations::parse_intelligently("123"), Some(123));
+    assert_eq!(IoOperations::parse_intelligently("-456"), Some(-456));
+
+    // Test number extraction
+    assert_eq!(IoOperations::parse_intelligently("abc123def"), Some(123));
+
+    // Test word parsing
+    assert_eq!(IoOperations::parse_intelligently("zero"), Some(0));
+    assert_eq!(IoOperations::parse_intelligently("one"), Some(1));
+    assert_eq!(IoOperations::parse_intelligently("five"), Some(5));
+    assert_eq!(IoOperations::parse_intelligently("ten"), Some(10));
+    assert_eq!(IoOperations::parse_intelligently("ZERO"), Some(0)); // Case insensitive
+
+    // Test invalid input
+    assert_eq!(IoOperations::parse_intelligently("abc"), None);
+    assert_eq!(IoOperations::parse_intelligently(""), None);
+}
+
+#[test]
+fn test_numeric_validation_modes() {
+    use tubular::operations::io::{IoOperations, ValidationMode};
+
+    // Test lenient mode
+    let result = IoOperations::validate_and_parse_numeric("123", ValidationMode::Lenient).unwrap();
+    assert_eq!(result, "123");
+
+    let result = IoOperations::validate_and_parse_numeric("abc", ValidationMode::Lenient).unwrap();
+    assert_eq!(result, "0"); // Falls back to 0
+
+    let result = IoOperations::validate_and_parse_numeric("", ValidationMode::Lenient).unwrap();
+    assert_eq!(result, "0"); // Empty input becomes 0
+
+    // Test strict mode
+    let result = IoOperations::validate_and_parse_numeric("123", ValidationMode::Strict).unwrap();
+    assert_eq!(result, "123");
+
+    let result = IoOperations::validate_and_parse_numeric("abc", ValidationMode::Strict);
+    assert!(result.is_err()); // Should error on invalid input
+
+    // Test permissive mode
+    let result = IoOperations::validate_and_parse_numeric("five", ValidationMode::Permissive).unwrap();
+    assert_eq!(result, "5"); // Parses word to number
+
+    let result = IoOperations::validate_and_parse_numeric("abc123def", ValidationMode::Permissive).unwrap();
+    assert_eq!(result, "123"); // Extracts number
+
+    let result = IoOperations::validate_and_parse_numeric("xyz", ValidationMode::Permissive).unwrap();
+    assert_eq!(result, "0"); // Falls back to 0
+}
+
+#[test]
+fn test_enhanced_calculator_program() {
+    // Test the enhanced calculator program structure
+    let program = r"
+@
+|
+??
+:
+??
+:
+A
+n,
+!
+";
+
+    let parser = tubular::parser::grid_parser::GridParser::new();
+    let grid = parser.parse_string(program).unwrap();
+
+    // Verify the program structure is valid
+    assert!(grid.start.is_some());
+    assert!(grid.size() > 0);
+
+    // Verify we can create an interpreter
+    let interpreter = tubular::interpreter::execution::TubularInterpreter::new(grid);
+    assert!(interpreter.is_ok());
+}
+
+#[test]
+fn test_character_input_program() {
+    // Test character input program structure
+    let program = r"
+@
+?
+,
+!
+";
+
+    let parser = tubular::parser::grid_parser::GridParser::new();
+    let grid = parser.parse_string(program).unwrap();
+
+    // Verify the program structure is valid
+    assert!(grid.start.is_some());
+    assert!(grid.size() > 0);
+
+    // Verify we can create an interpreter
+    let interpreter = tubular::interpreter::execution::TubularInterpreter::new(grid);
+    assert!(interpreter.is_ok());
+}
+
+#[test]
+fn test_mixed_io_program() {
+    // Test a program that uses multiple types of I/O
+    let program = r"
+@
+|
+7
+|
+??
+A
+n,
+?
+,
+!
+";
+
+    let parser = tubular::parser::grid_parser::GridParser::new();
+    let grid = parser.parse_string(program).unwrap();
+
+    // Verify the program structure is valid
+    assert!(grid.start.is_some());
+    assert!(grid.size() > 5);
+
+    // Should be able to create interpreter
+    let interpreter = tubular::interpreter::execution::TubularInterpreter::new(grid);
+    assert!(interpreter.is_ok());
+}
+
+#[test]
+fn test_io_error_handling() {
+    use tubular::operations::io::{IoOperations, ValidationMode};
+
+    // Test that strict validation properly handles errors
+    let invalid_inputs = ["abc", "12.3", "1e5", "NaN", "inf"];
+
+    for input in invalid_inputs.iter() {
+        let result = IoOperations::validate_and_parse_numeric(input, ValidationMode::Strict);
+        assert!(result.is_err(), "Input '{}' should cause validation error", input);
+    }
+}
+
+#[test]
+fn test_io_buffer_with_multiple_lines() {
+    use tubular::operations::io::InputBuffer;
+
+    // Test buffer with multiple lines of input
+    let input = "5\n3\n+\n7".to_string();
+    let buffer = InputBuffer::with_input(input);
+
+    // We can't easily test the actual reading without mocking stdin,
+    // but we can verify the buffer was created correctly
+    assert_eq!(buffer.validation_mode(), tubular::operations::io::ValidationMode::Lenient);
+}

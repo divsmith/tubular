@@ -1,0 +1,45 @@
+# Memory Test Program
+# Demonstrates reservoir Put (P) and Get (G) operations
+#
+# This program:
+# 1. Stores value 42 at coordinate (7, 15)
+# 2. Stores value 99 at coordinate (10, 20)
+# 3. Retrieves the value from (7, 15) and outputs it
+# 4. Retrieves the value from (10, 20) and outputs it
+# 5. Demonstrates that uninitialized memory returns 0
+
+@
+|
+7           # Set x-coordinate for memory operations
+:
+15          # Set y-coordinate for first memory operation
+:
+42          # Set value to store
+P           # Put 42 at coordinate (7, 15)
+|
+10          # Set x-coordinate for second memory operation
+:
+20          # Set y-coordinate for second memory operation
+:
+99          # Set value to store
+P           # Put 99 at coordinate (10, 20)
+|
+7           # Set x-coordinate for retrieval
+:
+15          # Set y-coordinate for retrieval
+G           # Get value from (7, 15) - should be 42
+n,          # Output as number
+|
+10          # Set x-coordinate for retrieval
+:
+20          # Set y-coordinate for retrieval
+G           # Get value from (10, 20) - should be 99
+n,          # Output as number
+|
+5           # Set x-coordinate for uninitialized memory test
+:
+25          # Set y-coordinate (no value stored here)
+G           # Get value from (5, 25) - should be 0
+n,          # Output as number
+!
+# Expected output: 42,99,0,

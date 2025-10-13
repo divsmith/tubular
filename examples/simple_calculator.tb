@@ -1,0 +1,17 @@
+# Simple Interactive Calculator
+# Reads two numbers and outputs their sum
+#
+# Usage:
+#   First input: first number
+#   Second input: second number
+#   Output: sum of the two numbers
+
+@
+|
+??          # Read first number (numeric input)
+:
+??          # Read second number (numeric input)
+:
+A           # Add the two numbers
+n,          # Output result as number
+!           # End program

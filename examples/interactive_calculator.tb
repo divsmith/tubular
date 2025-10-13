@@ -1,0 +1,93 @@
+# Interactive Calculator for Tubular
+# Reads two numbers and an operation, performs the calculation, and outputs the result
+#
+# Usage:
+#   First input: first number (use ?? for numeric input)
+#   Second input: operation character (+, -, *, /, %)
+#   Third input: second number (use ?? for numeric input)
+#   Output: calculation result
+#
+# Flow: Start -> read first number -> read operation -> read second number -> perform calculation -> output result
+
+@
+|
+??          # Read first number (numeric input)
+:
+??          # Read second number (numeric input)
+:
+?           # Read operation (character input)
+:
+d           # Duplicate operation for checking
+A           # Add operation (ASCII value) to stack
+=           # Compare with '+' (ASCII 43)
+|\
+0 \         # If not plus, continue checking
+1
+A           # Add operation to stack
+=           # Compare with '-' (ASCII 45)
+|\
+0 \         # If not minus, continue checking
+2
+A           # Add operation to stack
+=           # Compare with '*' (ASCII 42)
+|\
+0 \         # If not multiply, continue checking
+3
+A           # Add operation to stack
+=           # Compare with '/' (ASCII 47)
+|\
+0 \         # If not divide, continue checking
+4
+A           # Add operation to stack
+=           # Compare with '%' (ASCII 37)
+|\
+0 \         # If not modulo, default to addition
+0
+\           # If it was '+', go to addition section
+|
+A           # Perform addition
+n,          # Output result as number
+!
+/
+\           # If it was '-', go to subtraction section
+|
+S           # Perform subtraction
+n,          # Output result as number
+!
+/
+\           # If it was '*', go to multiplication section
+|
+M           # Perform multiplication
+n,          # Output result as number
+!
+/
+\           # If it was '/', go to division section
+|
+D           # Perform division
+n,          # Output result as number
+!
+/
+\           # If it was '%', go to modulo section
+|
+%           # Perform modulo
+n,          # Output result as number
+!
+!
+\           # Default case: perform addition
+|
+A           # Perform addition
+n,          # Output result as number
+!
+!
+
+# Alternative simpler version - reads two numbers and adds them:
+#
+# @
+# |
+# ??
+# :
+# ??
+# :
+# A
+# n,
+# !

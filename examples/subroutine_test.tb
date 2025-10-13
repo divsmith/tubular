@@ -1,0 +1,87 @@
+# Subroutine Test Program
+# Demonstrates subroutine Call (C) and Return (R) operations
+#
+# This program:
+# 1. Calls a subroutine at (0, 5) that prints "Hello"
+# 2. Calls a subroutine at (0, 10) that prints "World"
+# 3. Demonstrates nested calls
+# 4. Shows proper return behavior
+
+# Main program starts here
+@
+|
+1           # Set x-coordinate for first subroutine call
+:
+5           # Set y-coordinate for first subroutine call
+:
+0           # Set direction after jump (0=Up, 1=Right, 2=Down, 3=Left)
+C           # Call subroutine at (1, 5)
+|
+2           # Set x-coordinate for second subroutine call
+:
+10          # Set y-coordinate for second subroutine call
+:
+0           # Set direction after jump
+C           # Call subroutine at (2, 10)
+|
+!           # End main program
+
+# First subroutine at (1, 5) - prints "Hello"
+1,5
+|
+72          # ASCII 'H'
+,           # Output character
+|
+101         # ASCII 'e'
+,           # Output character
+|
+108         # ASCII 'l'
+,           # Output character
+|
+108         # ASCII 'l'
+,           # Output character
+|
+111         # ASCII 'o'
+,           # Output character
+|
+32          # ASCII space
+,           # Output character
+|
+R           # Return to main program
+
+# Second subroutine at (2, 10) - prints "World" and calls nested subroutine
+2,10
+|
+87          # ASCII 'W'
+,           # Output character
+|
+111         # ASCII 'o'
+,           # Output character
+|
+114         # ASCII 'r'
+,           # Output character
+|
+108         # ASCII 'l'
+,           # Output character
+|
+100         # ASCII 'd'
+,           # Output character
+|
+3           # Set x-coordinate for nested subroutine call
+:
+15          # Set y-coordinate for nested subroutine call
+:
+0           # Set direction after jump
+C           # Call nested subroutine at (3, 15)
+|
+R           # Return to main program
+
+# Nested subroutine at (3, 15) - prints "!"
+3,15
+|
+33          # ASCII '!'
+,           # Output character
+|
+R           # Return to second subroutine
+
+# Expected output: "Hello World!"
