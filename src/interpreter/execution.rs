@@ -9,6 +9,7 @@ use crate::interpreter::memory::Reservoir;
 use crate::interpreter::subroutines::{CallStack, StackFrame};
 use crate::operations::arithmetic::ArithmeticOperations;
 use crate::operations::io::IoOperations;
+use crate::operations::flow_control::FlowControlOperations;
 use std::collections::{HashMap, HashSet};
 use std::io::{self, Write};
 
@@ -96,7 +97,7 @@ impl TubularInterpreter {
             grid,
             verbose: false,
             trace: false,
-            max_ticks: None,
+            max_ticks: Some(1000), // Add default tick limit to prevent infinite loops
         })
     }
 
@@ -142,8 +143,13 @@ impl TubularInterpreter {
         let mut output_this_tick = String::new();
 
         // Phase 1: Calculate movements and generate commands
-        for droplet in &self.state.droplets {
+        let mut i = 0;
+        while i < self.state.droplets.len() {
+            let droplet_id = self.state.droplets[i].id;
+            let droplet = &mut self.state.droplets[i];
+
             if !droplet.active {
+                i += 1;
                 continue;
             }
 
@@ -155,16 +161,95 @@ impl TubularInterpreter {
                         id: droplet.id,
                         action: Action::Destroy,
                     });
+                    i += 1;
                     continue;
                 }
             };
 
-            let command = self.process_cell(droplet, current_cell, &mut output_this_tick)?;
+            // Process the cell and handle input operations inline to avoid borrow conflicts
+            let command = match current_cell.symbol {
+                '?' => {
+                    // Input operations - need to handle inline
+                    let next_pos = droplet.position + droplet.direction;
+                    if let Some(next_cell) = self.grid.get(next_pos) {
+                        if next_cell.symbol == '?' {
+                            // This is ?? (numeric input)
+                            let input_str = IoOperations::process_numeric_input()?;
+                            if let Ok(value) = input_str.parse::<i64>() {
+                                droplet.set_value(TubularBigInt::new(value));
+                            } else {
+                                droplet.set_value(TubularBigInt::zero());
+                            }
+                            DropletCommand::move_action(droplet_id, droplet.direction)
+                        } else {
+                            // Single ? (character input)
+                            let input_str = IoOperations::process_character_input()?;
+                            if input_str.len() >= 1 {
+                                let char_value = input_str.chars().next().unwrap_or('\0') as u8;
+                                droplet.set_value(TubularBigInt::new(char_value as i64));
+                            }
+                            DropletCommand::move_action(droplet_id, droplet.direction)
+                        }
+                    } else {
+                        // Single ? at boundary (character input)
+                        let input_str = IoOperations::process_character_input()?;
+                        if input_str.len() >= 1 {
+                            let char_value = input_str.chars().next().unwrap_or('\0') as u8;
+                            droplet.set_value(TubularBigInt::new(char_value as i64));
+                        }
+                        DropletCommand::move_action(droplet_id, droplet.direction)
+                    }
+                }
+                _ => {
+                    // Process all other symbols using a simplified inline version
+                    match current_cell.symbol {
+                        // Flow control pipes
+                        '|' | '-' => DropletCommand::move_action(droplet_id, droplet.direction),
+                        '/' => {
+                            let new_dir = match droplet.direction {
+                                Direction::Right => Direction::Up,
+                                Direction::Down => Direction::Left,
+                                Direction::Left => Direction::Down,
+                                Direction::Up => Direction::Right,
+                            };
+                            DropletCommand::move_action(droplet_id, new_dir)
+                        }
+                        '\\' => {
+                            // Handle conditional branching for backslash
+                            let new_dir = FlowControlOperations::process_conditional_branch(droplet, droplet.direction);
+                            DropletCommand::move_action(droplet_id, new_dir)
+                        }
+                        '^' => DropletCommand::move_action(droplet_id, Direction::Up),
+                        '@' => DropletCommand::move_action(droplet_id, droplet.direction),
+                        '!' => DropletCommand::destroy_action(droplet_id),
+                        '0'..='9' => {
+                            let value = current_cell.symbol.to_digit(10).unwrap() as i64;
+                            DropletCommand::set_value_action(droplet_id, TubularBigInt::new(value), droplet.direction)
+                        }
+                        _ if ArithmeticOperations::is_arithmetic_operation(current_cell.symbol) => {
+                            DropletCommand { id: droplet_id, action: Action::Stay }
+                        }
+                        ',' => {
+                            // Character output
+                            let output_str = IoOperations::process_character_output(droplet)?;
+                            output_this_tick.push_str(&output_str);
+                            DropletCommand::move_action(droplet_id, droplet.direction)
+                        }
+                        'n' => {
+                            // Numeric output
+                            let output_str = IoOperations::process_numeric_output(droplet)?;
+                            output_this_tick.push_str(&output_str);
+                            DropletCommand::move_action(droplet_id, droplet.direction)
+                        }
+                        _ => DropletCommand::destroy_action(droplet_id),
+                    }
+                }
+            };
 
             match command.action {
                 Action::Move(direction) => {
                     let next_pos = droplet.position + direction;
-                    next_positions.entry(next_pos).or_default().push(droplet.id);
+                    next_positions.entry(next_pos).or_default().push(droplet_id);
                     commands.push(command);
                 }
                 Action::SetValue(_) => {
@@ -173,12 +258,12 @@ impl TubularInterpreter {
                 }
                 Action::SetValueAndMove(_, direction) => {
                     let next_pos = droplet.position + direction;
-                    next_positions.entry(next_pos).or_default().push(droplet.id);
+                    next_positions.entry(next_pos).or_default().push(droplet_id);
                     commands.push(command);
                 }
                 Action::Destroy => {
                     commands.push(DropletCommand {
-                        id: droplet.id,
+                        id: droplet_id,
                         action: Action::Destroy,
                     });
                 }
@@ -186,6 +271,7 @@ impl TubularInterpreter {
                     commands.push(command);
                 }
             }
+            i += 1;
         }
 
         // Phase 2: Detect collisions
@@ -219,6 +305,12 @@ impl TubularInterpreter {
             self.state.status = ExecutionStatus::Completed;
         }
 
+        // Debug: Print droplet positions
+        for droplet in &self.state.droplets {
+            eprintln!("DEBUG: Droplet {} at {} direction: {}, active: {}",
+                droplet.id, droplet.position, droplet.direction, droplet.active);
+        }
+
         // Add output from this tick
         if !output_this_tick.is_empty() {
             self.state.output.push_str(&output_this_tick);
@@ -237,19 +329,32 @@ impl TubularInterpreter {
 
     /// Execute until completion or tick limit
     pub fn run(&mut self) -> Result<ExecutionResult> {
+        eprintln!("DEBUG: Entering run() method");
         let mut max_droplets = self.state.droplets.len();
         let mut total_ticks = 0;
+        let mut tick_count = 0;
 
+        eprintln!("DEBUG: Starting execution loop, status: {:?}", self.state.status);
         while self.state.status == ExecutionStatus::Running {
+            tick_count += 1;
+            if tick_count > 10 {
+                eprintln!("DEBUG: Too many ticks, breaking to prevent infinite loop");
+                break;
+            }
+
+            eprintln!("DEBUG: Tick {} - Starting execute_tick()", tick_count);
             max_droplets = max_droplets.max(self.state.droplets.len());
 
             let tick_result = self.execute_tick()?;
             total_ticks = tick_result.tick;
+            eprintln!("DEBUG: Tick {} completed, status: {:?}, active droplets: {}",
+                tick_count, self.state.status, self.state.droplets.len());
 
             // Output immediate results if available
             if let Some(output) = tick_result.output {
                 print!("{}", output);
                 io::stdout().flush()?;
+                eprintln!("DEBUG: Output generated: {:?}", output);
             }
 
             if self.verbose {
@@ -267,86 +372,7 @@ impl TubularInterpreter {
         })
     }
 
-    /// Process a cell and determine the droplet's action
-    fn process_cell(&self, droplet: &Droplet, cell: &ProgramCell, output: &mut String) -> Result<DropletCommand> {
-        let symbol = cell.symbol;
-
-        if self.trace {
-            eprintln!("TRACE | TICK {:05} | Droplet {} | ({}) -> ({}) | value: {} -> {} | dir: {} -> {}",
-                self.state.tick,
-                droplet.id,
-                droplet.position,
-                droplet.next_position(),
-                droplet.value,
-                droplet.value, // Will be modified by operations
-                droplet.direction,
-                droplet.direction // Will be modified by flow control
-            );
-        }
-
-        match symbol {
-            // Flow control pipes
-            '|' => Ok(DropletCommand::move_action(droplet.id, droplet.direction)),
-            '-' => Ok(DropletCommand::move_action(droplet.id, droplet.direction)),
-            '/' => {
-                let new_dir = match droplet.direction {
-                    Direction::Right => Direction::Up,
-                    Direction::Down => Direction::Left,
-                    Direction::Left => Direction::Down,
-                    Direction::Up => Direction::Right,
-                };
-                Ok(DropletCommand::move_action(droplet.id, new_dir))
-            }
-            '\\' => {
-                let new_dir = match droplet.direction {
-                    Direction::Right => Direction::Down,
-                    Direction::Up => Direction::Left,
-                    Direction::Left => Direction::Up,
-                    Direction::Down => Direction::Right,
-                };
-                Ok(DropletCommand::move_action(droplet.id, new_dir))
-            }
-            '^' => Ok(DropletCommand::move_action(droplet.id, Direction::Up)),
-
-            // Start symbol (just pass through)
-            '@' => Ok(DropletCommand::move_action(droplet.id, droplet.direction)),
-
-            // Sink symbol (destroy droplet)
-            '!' => Ok(DropletCommand::destroy_action(droplet.id)),
-
-            // Numeric literals (0-9) - set value and move
-            '0'..='9' => {
-                let value = symbol.to_digit(10).unwrap() as i64;
-                Ok(DropletCommand::set_value_action(droplet.id, TubularBigInt::new(value), droplet.direction))
-            }
-
-            // Arithmetic and stack operations - these don't move, just modify state
-            _ if ArithmeticOperations::is_arithmetic_operation(symbol) => {
-                Ok(DropletCommand {
-                    id: droplet.id,
-                    action: Action::Stay,
-                })
-            }
-
-            // Character output
-            ',' => {
-                let output_str = IoOperations::process_character_output(droplet)?;
-                output.push_str(&output_str);
-                Ok(DropletCommand::move_action(droplet.id, droplet.direction))
-            }
-
-            // Numeric output
-            'n' => {
-                let output_str = IoOperations::process_numeric_output(droplet)?;
-                output.push_str(&output_str);
-                Ok(DropletCommand::move_action(droplet.id, droplet.direction))
-            }
-
-            // For now, treat unknown symbols as empty space (destroy droplet)
-            _ => Ok(DropletCommand::destroy_action(droplet.id)),
-        }
-    }
-
+    
     /// Execute a droplet command
     fn execute_command(&mut self, command: DropletCommand) -> Result<()> {
         let droplet = self.state.droplets.iter_mut()

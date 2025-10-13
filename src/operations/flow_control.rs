@@ -1,5 +1,7 @@
 use crate::types::direction::Direction;
 use crate::interpreter::grid::ProgramCell;
+use crate::interpreter::droplet::Droplet;
+use crate::types::bigint::TubularBigInt;
 
 /// Flow control operations for pipe symbols
 pub struct FlowControlOperations;
@@ -11,12 +13,34 @@ impl FlowControlOperations {
             '|' => Direction::Down,  // Vertical pipe - continue vertical
             '-' => current_direction, // Horizontal pipe - continue horizontal
             '/' => Self::process_forward_slash(current_direction),
-            '\\' => Self::process_backslash(current_direction),
+            '\\' => current_direction, // Backslash is handled specially for conditional branching
             '^' => Direction::Up,     // Force upward
             'v' => Direction::Down,   // Force downward
             '<' => Direction::Left,   // Force leftward
             '>' => Direction::Right,  // Force rightward
             _ => current_direction,   // No change for other symbols
+        }
+    }
+
+    /// Process conditional branching for backslash (\) based on droplet value
+    /// Returns the direction the droplet should take
+    pub fn process_conditional_branch(
+        droplet: &Droplet,
+        current_direction: Direction
+    ) -> Direction {
+        // If droplet value is non-zero, continue normally (like regular backslash)
+        // If droplet value is zero, reverse direction (terminate loop)
+        if droplet.value.is_zero() {
+            // Zero value: reverse direction (loop termination)
+            match current_direction {
+                Direction::Right => Direction::Left,
+                Direction::Down => Direction::Up,
+                Direction::Left => Direction::Right,
+                Direction::Up => Direction::Down,
+            }
+        } else {
+            // Non-zero value: continue with normal backslash behavior
+            Self::process_backslash(current_direction)
         }
     }
 

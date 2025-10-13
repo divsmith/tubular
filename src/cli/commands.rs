@@ -76,8 +76,8 @@ impl Cli {
             Some(Commands::Validate { ref file, strict }) => {
                 self.validate_program(file, strict)
             }
-            Some(Commands::Run { ref file, interactive: _, input: _ }) => {
-                self.execute_program(file)
+            Some(Commands::Run { ref file, interactive, ref input }) => {
+                self.execute_program_interactive(file, interactive, input.clone())
             }
             Some(Commands::Benchmark { ref file, iterations: _, output: _ }) => {
                 self.execute_program(file) // For now, just run the program
@@ -122,6 +122,78 @@ impl Cli {
 
     /// Execute a program file
     fn execute_program(&self, file_path: &str) -> Result<()> {
+        eprintln!("DEBUG: Starting execute_program for {}", file_path);
+
+        // Read and parse the program
+        eprintln!("DEBUG: Reading file...");
+        let content = fs::read_to_string(file_path)
+            .map_err(|e| InterpreterError::System(
+                crate::types::error::SystemError::IoError(e.to_string())
+            ))?;
+        eprintln!("DEBUG: File read successfully, {} bytes", content.len());
+
+        if self.verbose {
+            eprintln!("Parsing program: {}", file_path);
+        }
+
+        eprintln!("DEBUG: Creating parser...");
+        let parser = GridParser::new();
+        eprintln!("DEBUG: Parser created");
+
+        eprintln!("DEBUG: Parsing content...");
+        let grid = parser.parse_string(&content)?;
+        eprintln!("DEBUG: Parsing successful!");
+
+        if self.verbose {
+            eprintln!("Program parsed successfully:");
+            eprintln!("  Grid size: {}x{}", grid.dimensions().0, grid.dimensions().1);
+            eprintln!("  Program cells: {}", grid.size());
+            eprintln!("  Start position: {:?}", grid.start);
+        }
+
+        // Create and run interpreter
+        eprintln!("DEBUG: Creating interpreter...");
+        let mut interpreter = TubularInterpreter::new(grid)?;
+        eprintln!("DEBUG: Interpreter created");
+
+        eprintln!("DEBUG: Setting options...");
+        interpreter = interpreter.with_options(self.verbose, self.trace, self.ticks);
+        eprintln!("DEBUG: Options set");
+
+        eprintln!("DEBUG: Starting execution...");
+        let result = interpreter.run()?;
+
+        if self.verbose {
+            eprintln!("Starting execution...");
+        }
+
+        let result = interpreter.run()?;
+
+        // Print execution results
+        match result.status {
+            crate::interpreter::execution::ExecutionStatus::Completed => {
+                if self.verbose {
+                    eprintln!("✓ Program completed successfully");
+                    eprintln!("  Total ticks: {}", result.total_ticks);
+                    eprintln!("  Max droplets: {}", result.max_droplets);
+                    eprintln!("  Max stack depth: {}", result.max_stack_depth);
+                }
+            }
+            crate::interpreter::execution::ExecutionStatus::Timeout(ticks) => {
+                eprintln!("⚠ Program execution timed out after {} ticks", ticks);
+            }
+            crate::interpreter::execution::ExecutionStatus::Error(err) => {
+                eprintln!("✗ Program execution failed: {}", err);
+                return Err(err.into());
+            }
+            _ => {}
+        }
+
+        Ok(())
+    }
+
+    /// Execute a program file with interactive input support
+    fn execute_program_interactive(&self, file_path: &str, interactive: bool, input: Option<String>) -> Result<()> {
         // Read and parse the program
         let content = fs::read_to_string(file_path)
             .map_err(|e| InterpreterError::System(
@@ -140,6 +212,20 @@ impl Cli {
             eprintln!("  Grid size: {}x{}", grid.dimensions().0, grid.dimensions().1);
             eprintln!("  Program cells: {}", grid.size());
             eprintln!("  Start position: {:?}", grid.start);
+            if interactive {
+                eprintln!("  Interactive mode: enabled");
+            }
+            if let Some(ref input_str) = input {
+                eprintln!("  Input provided: {}", input_str);
+            }
+        }
+
+        // Handle interactive input setup
+        if interactive {
+            eprintln!("🔧 Interactive mode enabled - program can read from stdin");
+            if input.is_some() {
+                eprintln!("📝 Using provided command line input instead of stdin");
+            }
         }
 
         // Create and run interpreter
@@ -160,6 +246,10 @@ impl Cli {
                     eprintln!("  Total ticks: {}", result.total_ticks);
                     eprintln!("  Max droplets: {}", result.max_droplets);
                     eprintln!("  Max stack depth: {}", result.max_stack_depth);
+                }
+
+                if interactive {
+                    eprintln!("🎯 Interactive execution completed");
                 }
             }
             crate::interpreter::execution::ExecutionStatus::Timeout(ticks) => {

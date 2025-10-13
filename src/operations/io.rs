@@ -1,6 +1,7 @@
-use crate::types::bigint::TubularBigInt;
-use crate::types::error::{Result, ExecError, InitError};
 use crate::interpreter::droplet::Droplet;
+use crate::types::error::{Result, SystemError};
+use crate::types::bigint::TubularBigInt;
+use std::io;
 
 /// I/O operations for Tubular programs
 pub struct IoOperations;
@@ -26,9 +27,59 @@ impl IoOperations {
         Ok(String::new())
     }
 
+    /// Process character input (?) - read single character from stdin
+    pub fn process_character_input() -> Result<String> {
+        let mut input = String::new();
+        let mut reader = io::stdin();
+
+        // Read the first character from stdin
+        match reader.read_line(&mut input) {
+            Ok(_) => {
+                if let Some(ch) = input.chars().next() {
+                    Ok(ch.to_string())
+                } else {
+                    // End of input, return newline
+                    Ok("\n".to_string())
+                }
+            }
+            Err(e) => Err(SystemError::IoError(format!("Failed to read character input: {}", e)).into()),
+        }
+    }
+
+    /// Process numeric input (??) - read number from stdin
+    pub fn process_numeric_input() -> Result<String> {
+        let mut input = String::new();
+        let mut reader = io::stdin();
+
+        match reader.read_line(&mut input) {
+            Ok(_) => {
+                // Trim whitespace and parse as integer
+                let trimmed = input.trim();
+                if trimmed.is_empty() {
+                    // Empty input, return 0
+                    Ok("0".to_string())
+                } else {
+                    // Validate that it's a valid integer
+                    if trimmed.chars().all(|c| c.is_ascii_digit() || (c == '-' && trimmed.len() > 1)) {
+                        Ok(trimmed.to_string())
+                    } else {
+                        // Invalid numeric input, treat as 0
+                        Ok("0".to_string())
+                    }
+                }
+            }
+            Err(e) => Err(SystemError::IoError(format!("Failed to read numeric input: {}", e)).into()),
+        }
+    }
+
     /// Check if a character is an I/O operation
     pub fn is_io_operation(symbol: char) -> bool {
-        matches!(symbol, ',' | 'n' | '!')
+        matches!(symbol, ',' | 'n' | '!' | '?')
+    }
+
+    /// Check if a character is a data source operation (input)
+    pub fn is_data_source(symbol: char) -> bool {
+        matches!(symbol, '?')
     }
 
     /// Check if a character is a data sink operation
@@ -108,5 +159,35 @@ mod tests {
         assert!(!IoOperations::is_data_sink('5'));
         assert!(!IoOperations::is_data_sink('A'));
         assert!(!IoOperations::is_data_sink('|'));
+    }
+
+    #[test]
+    fn test_data_source_detection() {
+        assert!(IoOperations::is_data_source('?'));
+        assert!(!IoOperations::is_data_source(','));
+        assert!(!IoOperations::is_data_source('5'));
+        assert!(!IoOperations::is_data_source('|'));
+    }
+
+    #[test]
+    fn test_character_input_operations() {
+        // These tests would require mocking stdin, so we just test the detection
+        assert!(IoOperations::is_io_operation('?'));
+    }
+
+    #[test]
+    fn test_extended_io_operation_detection() {
+        // Test that all I/O operations are detected
+        assert!(IoOperations::is_io_operation(','));  // character output
+        assert!(IoOperations::is_io_operation('n'));  // numeric output
+        assert!(IoOperations::is_io_operation('!'));  // sink
+        assert!(IoOperations::is_io_operation('?'));  // character input
+
+        // Test that non-I/O operations are not detected
+        assert!(!IoOperations::is_io_operation('5'));
+        assert!(!IoOperations::is_io_operation('A'));
+        assert!(!IoOperations::is_io_operation('|'));
+        assert!(!IoOperations::is_io_operation(':'));
+        assert!(!IoOperations::is_io_operation('+'));
     }
 }
