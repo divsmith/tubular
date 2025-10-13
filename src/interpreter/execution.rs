@@ -457,8 +457,8 @@ impl TubularInterpreter {
             self.execute_command(command)?;
         }
 
-        // Phase 4: Remove destroyed droplets
-        self.state.droplets.retain(|d| !destroyed_droplets.contains(&d.id));
+        // Phase 4: Remove destroyed and inactive droplets
+        self.state.droplets.retain(|d| !destroyed_droplets.contains(&d.id) && d.active);
 
         // Phase 5: Check if execution is complete
         if self.state.droplets.is_empty() {
@@ -482,14 +482,6 @@ impl TubularInterpreter {
                         progress_report.tick, progress_report.elapsed_time_ms, progress_report.active_droplets,
                         progress_report.total_collisions, progress_report.stack_depth);
                 }
-            }
-        }
-
-        // Debug: Print droplet positions
-        if self.trace {
-            for droplet in &self.state.droplets {
-                eprintln!("DEBUG: Droplet {} at {} direction: {}, active: {}",
-                    droplet.id, droplet.position, droplet.direction, droplet.active);
             }
         }
 

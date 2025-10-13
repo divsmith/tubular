@@ -29,3 +29,7 @@ path = "tests/unit/mod.rs"
 [[bench]]
 name = "performance"
 harness = false
+
+[[example]]
+name = "debug_grid_test"
+path = "examples/debug_grid_test.rs"
