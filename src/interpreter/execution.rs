@@ -11,7 +11,6 @@ use crate::operations::arithmetic::ArithmeticOperations;
 use crate::operations::io::IoOperations;
 use crate::operations::flow_control::FlowControlOperations;
 use std::collections::{HashMap, HashSet};
-use std::io::{self, Write};
 use std::time::Instant;
 
 /// Configuration for execution limits and timeouts
@@ -519,11 +518,8 @@ impl TubularInterpreter {
             let tick_result = self.execute_tick()?;
             total_ticks = tick_result.tick;
 
-            // Output immediate results if available
-            if let Some(output) = tick_result.output {
-                print!("{}", output);
-                io::stdout().flush()?;
-            }
+            // Note: Output is collected and will be printed once at the end
+            // to avoid duplicate printing
 
             // Verbose logging
             if self.verbose {

@@ -4,16 +4,16 @@
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.1.0-green?style=for-the-badge)](Cargo.toml)
 
-Tubular is an innovative 2D grid-based programming language where programs are visual pipe systems through which droplets of data flow. Inspired by fluid dynamics, programs are ASCII grids where the position and flow of droplets determine computation.
+Tubular is a 2D grid-based programming language where programs are visual pipe systems. Droplets of data flow through ASCII grids, and their positions determine computation.
 
 ## ✨ Features
 
-- **Visual Programming**: Write programs as 2D ASCII grids with intuitive pipe-based flow control
-- **Droplet-Based Execution**: Multiple droplets can execute simultaneously, with collision detection
+- **Visual Programming**: Write programs as 2D ASCII grids with pipe-based flow control
+- **Droplet Execution**: Multiple droplets execute simultaneously with collision detection
 - **Rich Operations**: Arithmetic, stack operations, memory access, and subroutines
-- **Interactive I/O**: Support for both character and numeric input/output
-- **High Performance**: Efficient interpreter with support for large programs (1000x1000 grids)
-- **Comprehensive Tooling**: Validation, benchmarking, and debugging capabilities
+- **Interactive I/O**: Character and numeric input/output support
+- **High Performance**: Efficient interpreter supporting large programs (1000x1000 grids)
+- **Comprehensive Tooling**: Validation, benchmarking, and debugging
 - **Turing Complete**: Full computational power with arbitrary precision integers
 
 ## 🚀 Quick Start
@@ -22,7 +22,7 @@ Tubular is an innovative 2D grid-based programming language where programs are v
 
 **From Source** (requires Rust 1.75+):
 ```bash
-git clone https://github.com/yourusername/tubular.git
+git clone https://github.com/divsmith/tubular.git
 cd tubular
 cargo install --path .
 ```
@@ -34,7 +34,7 @@ cargo install tubular
 
 ### Your First Program
 
-Create a file called `simple.tb` with this content:
+Create `simple.tb`:
 
 ```
 @       # Start point
@@ -53,19 +53,21 @@ tubular simple.tb
 
 Output:
 ```
-22
+2
 ```
+
+**How it works**: The droplet starts with value 0, moves down through the pipe `|`, encounters `7` and sets its value to 7, then encounters `2` and overwrites its value to 2, flows through `-` (horizontal pipe), and outputs the final value `2`.
 
 #### Character Output Example
 
-Create a file called `hello.tb` with this content:
+Create `hello.tb`:
 
 ```
 @       # Start point
 |       # Vertical pipe
-7       # Number 7 (creates a droplet with value 7)
+7       # Number 7
 -
-,       # Character output (outputs ASCII character 7: bell)
+,       # Character output (ASCII character 7: bell)
 !
 ```
 
@@ -79,14 +81,62 @@ Output:
 [bell sound]
 ```
 
-This example demonstrates how to output a character using the comma operator.
+The comma operator outputs the droplet's value as an ASCII character.
+
+#### Arithmetic Example
+
+For arithmetic operations, you need to use the stack. Here's how to compute 7 - 2:
+
+```
+@       # Start point
+|       # Vertical pipe
+7       # Number 7
+:       # Push to stack
+2       # Number 2
+S       # Subtract (7 - 2)
+n       # Output as number
+!       # Output sink
+```
+
+Run it:
+```bash
+tubular subtraction.tb
+```
+
+Output:
+```
+-7
+```
+
+**How it works**: The droplet pushes 7 to the stack with `:`, then its value becomes 2, then the `S` operation pops both values (2 and 7) from the stack, subtracts them (2 - 7 = -7), and sets the droplet's value to the result.
+
+#### Simple Increment
+
+For simple arithmetic, you can use unary operators:
+
+```
+@       # Start point
+|       # Vertical pipe
+7       # Number 7
++       # Increment
++       # Increment
+n       # Output as number
+!       # Output sink
+```
+
+Output:
+```
+9
+```
+
+**How it works**: The droplet starts with value 7, encounters two `+` operators, and increments its value twice (7 → 8 → 9).
 
 ## 📖 Tutorial
 
 ### Basic Concepts
 
-1. **Grid**: Your program is a 2D grid of ASCII characters
-2. **Droplets**: Data units that flow through pipes with a value and direction
+1. **Grid**: A 2D grid of ASCII characters forms your program
+2. **Droplets**: Data units flow through pipes with values and directions
 3. **Execution**: Starts at `@` with a droplet of value 0 moving downward
 4. **Ticks**: Discrete time units where all droplets move simultaneously
 
@@ -136,12 +186,12 @@ This example demonstrates how to output a character using the comma operator.
 :           # Push to stack
 ??          # Read second number
 :           # Push to stack
-A           # Add (stack: first + second)
+S           # Subtract (first - second)
 n,          # Output result as number
 !           # End
 ```
 
-**Run it**: `tubular calculator.tb` (then enter numbers when prompted)
+**Run**: `tubular calculator.tb` (enter numbers when prompted)
 
 #### 3. Memory Operations
 ```
@@ -214,7 +264,7 @@ tubular benchmark program1.tb --compare program2.tb program3.tb
 ```
 
 ### Environment Variables
-Configure default behavior with environment variables:
+Configure default behavior:
 
 ```bash
 export TUBULAR_TICK_LIMIT=5000      # Default tick limit
@@ -227,7 +277,7 @@ export TUBULAR_STRICT=true         # Enable strict validation
 ## 📊 Performance
 
 ### Benchmarks
-Tubular's interpreter is optimized for performance:
+The interpreter delivers high performance:
 
 - **Execution Speed**: ~50,000+ ticks per second
 - **Memory Usage**: Efficient grid representation (~1MB per 1000x1000 grid)
@@ -435,9 +485,9 @@ Subroutines use a dedicated call stack for nested function calls with proper ret
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how to get started:
+We welcome contributions!
 
-### Contributing Guidelines
+### Getting Started
 
 1. **Fork the Repository**
    ```bash
@@ -466,7 +516,7 @@ We welcome contributions! Here's how to get started:
    - Include tests and documentation
    - Link to any relevant issues
 
-### Areas for Contribution
+### Contribution Areas
 
 - **Performance Optimization**: Improve interpreter speed and memory usage
 - **Language Features**: Add new operations or capabilities
